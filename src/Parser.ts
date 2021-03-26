@@ -1,12 +1,6 @@
-type ParseResult<T> =
-    | {
-          ok: true;
-          value: [T, string];
-      }
-    | {
-          ok: false;
-          value: string;
-      };
+import { Result } from "./Result";
+
+type ParseResult<T> = Result<[T, string], string>;
 
 export type Parser<T> = {
     parse: (source: string) => ParseResult<T>;
@@ -22,20 +16,16 @@ export namespace Parser {
     export const exact = (toMatch: string): Parser<string> =>
         Parser<string>((source: string) => {
             if (source.slice(0, toMatch.length) === toMatch) {
-                return {
-                    ok: true,
-                    value: [toMatch, source.slice(toMatch.length)],
-                };
+                return Result.Ok([toMatch, source.slice(toMatch.length)]);
             }
-            return {
-                ok: false,
-                value: `Expected "${toMatch}" but got "${source.slice(
+            return Result.Err(
+                `Expected "${toMatch}" but got "${source.slice(
                     0,
                     toMatch.length,
                 )}" instead`,
-            };
+            );
         });
 
     export const succeed = <T>(value: T): Parser<T> =>
-        Parser<T>((source: string) => ({ ok: true, value: [value, source] }));
+        Parser<T>((source: string) => Result.Ok([value, source]));
 }

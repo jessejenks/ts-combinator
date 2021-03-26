@@ -1,3 +1,4 @@
+import { Result } from "./Result";
 import { Parser } from "./Parser";
 
 describe("Individual Parser functions", () => {
@@ -13,7 +14,7 @@ describe("Individual Parser functions", () => {
             "Tries to match %s against %s as expected",
             (toMatch, source, shouldHaveMatched) => {
                 const result = exact(toMatch).parse(source);
-                expect(result.ok).toBe(shouldHaveMatched);
+                expect(Result.isOk(result)).toBe(shouldHaveMatched);
             },
         );
     });
@@ -28,9 +29,15 @@ describe("Individual Parser functions", () => {
 
         test.each(cases)("Always succeeds with %s", (value, source) => {
             const result = succeed(value).parse(source);
-            expect(result.ok).toBe(true);
-            expect(result.value[0]).toBe(value);
-            expect(result.value[1]).toBe(source);
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value[0]).toBe(value);
+                    expect(result.value[1]).toBe(source);
+                    break;
+
+                case Result.Variant.Err:
+                    fail(result.error);
+            }
         });
     });
 });
