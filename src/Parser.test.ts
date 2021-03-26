@@ -140,4 +140,55 @@ describe("Individual Parser functions", () => {
             },
         );
     });
+
+    describe("oneOrMore", () => {
+        const { oneOrMore } = Parser;
+
+        const okCases: Array<[string, string, Parser<any>, any[]]> = [
+            ["aaaaa", "", Parser.exact("a"), ["a", "a", "a", "a", "a"]],
+            [
+                "aaaaabbbbb",
+                "bbbbb",
+                Parser.exact("a"),
+                ["a", "a", "a", "a", "a"],
+            ],
+        ];
+
+        test.each(okCases)(
+            "Matches one or more times",
+            (source, remaining, parser, matches) => {
+                const result = oneOrMore(parser).parse(source);
+
+                switch (result.variant) {
+                    case Result.Variant.Ok:
+                        expect(result.value[0]).toEqual(matches);
+                        expect(result.value[1]).toBe(remaining);
+                        break;
+
+                    case Result.Variant.Err:
+                        fail(result.error);
+                }
+            },
+        );
+
+        const errCases: Array<[string, string, Parser<any>]> = [
+            ["bbbbb", 'Expected "a" but got "b" instead', Parser.exact("a")],
+        ];
+
+        test.each(errCases)(
+            "Doesn't match one or more times",
+            (source, errMessage, parser) => {
+                const result = oneOrMore(parser).parse(source);
+
+                switch (result.variant) {
+                    case Result.Variant.Err:
+                        expect(result.error).toBe(errMessage);
+                        break;
+
+                    case Result.Variant.Ok:
+                        fail("Should not have parsed");
+                }
+            },
+        );
+    });
 });

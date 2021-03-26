@@ -57,6 +57,22 @@ export namespace Parser {
             }
             return Result.Ok([results, source]);
         });
+
+    export const oneOrMore = <T>(parser: Parser<T>) =>
+        Parser<T[]>((source: string) => {
+            const results: T[] = [];
+            let result: ParseResult<T> = parser.parse(source);
+            if (Result.isErr(result)) {
+                return result;
+            }
+
+            while (Result.isOk(result)) {
+                results.push(result.value[0]);
+                source = result.value[1];
+                result = parser.parse(source);
+            }
+            return Result.Ok([results, source]);
+        });
 }
 
 export namespace Parser {
