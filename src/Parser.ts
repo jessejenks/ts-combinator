@@ -29,15 +29,16 @@ export namespace Parser {
     export const succeed = <T>(value: T): Parser<T> =>
         Parser<T>((source: string) => Result.Ok([value, source]));
 
-    export const spaces = (): Parser<string> =>
-        Parser((source: string) => {
-            const match = /^\s*/.exec(source);
+    export const spaces = (): Parser<string> => fromRegExp(/\s*/, "whitespace");
+
+    const fromRegExp = (re: RegExp, expected: string) =>
+        Parser<string>((source: string) => {
+            const match = new RegExp(`^${re.source}`).exec(source);
             if (match === null) {
                 return Result.Err(
-                    `Expected spaces, but got "${source.slice(
+                    `Expected ${expected}, but got "${source.charAt(
                         0,
-                        5,
-                    )}..." instead`,
+                    )}" instead`,
                 );
             }
 
