@@ -66,4 +66,46 @@ describe("Individual Parser functions", () => {
             },
         );
     });
+
+    describe("sequence", () => {
+        const { sequence } = Parser;
+
+        it("can run a basic sequence of parsers", () => {
+            const result = sequence(
+                Parser.exact("yes,"),
+                Parser.spaces(),
+            ).parse("yes, and");
+
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value[0]).toEqual(["yes,", " "]);
+                    expect(result.value[1]).toBe("and");
+                    break;
+
+                case Result.Variant.Err:
+                    fail(result.error);
+            }
+        });
+
+        it("fails on the first parser to fail", () => {
+            const result = sequence(
+                Parser.exact("a"),
+                Parser.exact("b"),
+                Parser.exact("c"),
+                Parser.exact("d"),
+                Parser.exact("e"),
+            ).parse("abcfg");
+
+            switch (result.variant) {
+                case Result.Variant.Err:
+                    expect(result.error).toBe(
+                        `Expected "d" but got "f" instead`,
+                    );
+                    break;
+
+                case Result.Variant.Ok:
+                    fail("Should not have parsed");
+            }
+        });
+    });
 });
