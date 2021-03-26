@@ -1,0 +1,23 @@
+{
+    "name": "ts-combinator",
+    "version": "0.0.0",
+    "description": "simple typescript combinator library",
+    "main": "dist/index.js",
+    "scripts": {
+        "test": "jest --watchAll",
+        "build": "tsc --project ./"
+    },
+    "keywords": [
+        "parser",
+        "combinator",
+        "typescript"
+    ],
+    "author": "Jesse Jenks",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/jest": "^26.0.20",
+        "jest": "^26.6.3",
+        "ts-jest": "^26.5.2",
+        "typescript": "^4.2.2"
+    }
+}
