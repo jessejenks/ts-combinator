@@ -28,4 +28,21 @@ export namespace Parser {
 
     export const succeed = <T>(value: T): Parser<T> =>
         Parser<T>((source: string) => Result.Ok([value, source]));
+
+    export const spaces = (): Parser<string> =>
+        Parser((source: string) => {
+            const match = /^\s*/.exec(source);
+            if (match === null) {
+                return Result.Err(
+                    `Expected spaces, but got "${source.slice(
+                        0,
+                        5,
+                    )}..." instead`,
+                );
+            }
+
+            const [matched] = match;
+            const rest = source.slice(match.index + matched.length);
+            return Result.Ok([matched, rest]);
+        });
 }
