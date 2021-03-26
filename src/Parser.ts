@@ -45,6 +45,18 @@ export namespace Parser {
             const rest = source.slice(match.index + matched.length);
             return Result.Ok([matched, rest]);
         });
+
+    export const zeroOrMore = <T>(parser: Parser<T>) =>
+        Parser<T[]>((source: string) => {
+            const results: T[] = [];
+            let result: ParseResult<T> = parser.parse(source);
+            while (Result.isOk(result)) {
+                results.push(result.value[0]);
+                source = result.value[1];
+                result = parser.parse(source);
+            }
+            return Result.Ok([results, source]);
+        });
 }
 
 export namespace Parser {

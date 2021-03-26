@@ -108,4 +108,36 @@ describe("Individual Parser functions", () => {
             }
         });
     });
+
+    describe("zeroOrMore", () => {
+        const { zeroOrMore } = Parser;
+
+        const cases: Array<[string, string, Parser<any>, any[]]> = [
+            ["aaaaa", "", Parser.exact("a"), ["a", "a", "a", "a", "a"]],
+            ["bbbbb", "bbbbb", Parser.exact("a"), []],
+            [
+                "aaaaabbbbb",
+                "bbbbb",
+                Parser.exact("a"),
+                ["a", "a", "a", "a", "a"],
+            ],
+        ];
+
+        test.each(cases)(
+            "Matches zero or more times",
+            (source, remaining, parser, matches) => {
+                const result = zeroOrMore(parser).parse(source);
+
+                switch (result.variant) {
+                    case Result.Variant.Ok:
+                        expect(result.value[0]).toEqual(matches);
+                        expect(result.value[1]).toBe(remaining);
+                        break;
+
+                    case Result.Variant.Err:
+                        fail(result.error);
+                }
+            },
+        );
+    });
 });
