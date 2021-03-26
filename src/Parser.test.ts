@@ -191,4 +191,138 @@ describe("Individual Parser functions", () => {
             },
         );
     });
+
+    describe("oneOf", () => {
+        const { oneOf } = Parser;
+
+        it("fails if no parsers are provided", () => {
+            const result = oneOf().parse("anything");
+
+            switch (result.variant) {
+                case Result.Variant.Err:
+                    expect(result.error).toBe("No parsers provided");
+                    break;
+
+                case Result.Variant.Ok:
+                    fail("Should not have parsed");
+            }
+        });
+
+        it("acts like the underlying parser if only one parser is provided", () => {
+            const parser = oneOf(Parser.exact("a"));
+            let result = parser.parse("abc");
+
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value[0]).toEqual("a");
+                    expect(result.value[1]).toBe("bc");
+                    break;
+
+                case Result.Variant.Err:
+                    fail(result.error);
+            }
+
+            result = parser.parse("bcd");
+
+            switch (result.variant) {
+                case Result.Variant.Err:
+                    expect(result.error).toBe(
+                        'Expected "a" but got "b" instead',
+                    );
+                    break;
+
+                case Result.Variant.Ok:
+                    fail("Should not have parsed");
+            }
+        });
+
+        it("matches if any one of the given parsers matches", () => {
+            const parseA = Parser.exact("a");
+            const parseB = Parser.exact("b");
+            const parseC = Parser.exact("c");
+
+            const parser = oneOf(parseA, parseB, parseC);
+
+            let result = parser.parse("abc");
+
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value[0]).toEqual("a");
+                    expect(result.value[1]).toBe("bc");
+                    break;
+
+                case Result.Variant.Err:
+                    fail(result.error);
+            }
+
+            result = parser.parse("bca");
+
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value[0]).toEqual("b");
+                    expect(result.value[1]).toBe("ca");
+                    break;
+
+                case Result.Variant.Err:
+                    fail(result.error);
+            }
+
+            result = parser.parse("cab");
+
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value[0]).toEqual("c");
+                    expect(result.value[1]).toBe("ab");
+                    break;
+
+                case Result.Variant.Err:
+                    fail(result.error);
+            }
+
+            result = parser.parse("f");
+
+            switch (result.variant) {
+                case Result.Variant.Err:
+                    expect(result.error).toBe(
+                        'Expected "c" but got "f" instead',
+                    );
+                    break;
+
+                case Result.Variant.Ok:
+                    fail("Should not have parsed");
+            }
+        });
+
+        it("matches on the first parser to match", () => {
+            let result = oneOf(
+                Parser.exact("longer"),
+                Parser.exact("long"),
+            ).parse("longer matches");
+
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value[0]).toEqual("longer");
+                    expect(result.value[1]).toBe(" matches");
+                    break;
+
+                case Result.Variant.Err:
+                    fail(result.error);
+            }
+
+            result = oneOf(
+                Parser.exact("short"),
+                Parser.exact("shorter"),
+            ).parse("shorter matches");
+
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value[0]).toEqual("short");
+                    expect(result.value[1]).toBe("er matches");
+                    break;
+
+                case Result.Variant.Err:
+                    fail(result.error);
+            }
+        });
+    });
 });

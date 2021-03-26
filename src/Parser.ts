@@ -73,6 +73,20 @@ export namespace Parser {
             }
             return Result.Ok([results, source]);
         });
+
+    export function oneOf<T>(...parsers: Parser<T>[]): Parser<T> {
+        return Parser((source: string) => {
+            let result: Result<[T, string], string> | null = null;
+            for (let i = 0; i < parsers.length; i++) {
+                const parser = parsers[i];
+                result = parser.parse(source);
+                if (Result.isOk(result)) {
+                    return result;
+                }
+            }
+            return result ?? Result.Err("No parsers provided");
+        });
+    }
 }
 
 export namespace Parser {
