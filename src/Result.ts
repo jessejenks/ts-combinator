@@ -37,4 +37,17 @@ export namespace Result {
     export function isErr<T, E>(result: Result<T, E>): result is Err<E> {
         return result.variant === Variant.Err;
     }
+
+    export const map = <A, B, E>(
+        f: (a: A) => B,
+        result: Result<A, E>,
+    ): Result<B, E> => {
+        switch (result.variant) {
+            case Variant.Err:
+                return result;
+
+            case Variant.Ok:
+                return Result.Ok(f(result.value));
+        }
+    };
 }
