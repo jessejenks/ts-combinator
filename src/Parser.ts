@@ -31,12 +31,41 @@ export namespace Parser {
 
     export const spaces = (): Parser<string> => fromRegExp(/\s*/, "whitespace");
 
+    export const digits = (): Parser<string> => fromRegExp(/[0-9]+/, "digits");
+
+    export const singleDigit = (): Parser<string> =>
+        fromRegExp(/[0-9]/, "a digit");
+
+    export const alpha = (): Parser<string> =>
+        fromRegExp(/[a-zA-Z]+/, "characters");
+
+    export const singleAlpha = (): Parser<string> =>
+        fromRegExp(/[a-zA-Z]/, "a character");
+
+    export const upper = (): Parser<string> =>
+        fromRegExp(/[A-Z]+/, "upper case characters");
+
+    export const singleUpper = (): Parser<string> =>
+        fromRegExp(/[A-Z]/, "an upper case character");
+
+    export const lower = (): Parser<string> =>
+        fromRegExp(/[a-z]+/, "lower case characters");
+
+    export const singleLower = (): Parser<string> =>
+        fromRegExp(/[a-z]/, "a lower case character");
+
+    export const alphaNum = (): Parser<string> =>
+        fromRegExp(/[a-zA-Z0-9]+/, "alpha numeric characters");
+
+    export const singleAlphaNum = (): Parser<string> =>
+        fromRegExp(/[a-zA-Z0-9]/, "an alpha numeric character");
+
     const fromRegExp = (re: RegExp, expected: string) =>
         Parser<string>((source: string) => {
             const match = new RegExp(`^${re.source}`).exec(source);
             if (match === null) {
                 return Result.Err(
-                    `Expected ${expected}, but got "${source.charAt(
+                    `Expected ${expected} but got "${source.charAt(
                         0,
                     )}" instead`,
                 );

@@ -5,16 +5,40 @@ describe("Individual Parser functions", () => {
     describe("exact", () => {
         const { exact } = Parser;
 
-        const cases: Array<[string, string, boolean]> = [
-            ["hello", "hello world", true],
-            ["goodbye", "hello world", false],
+        const okCases: Array<[string, string]> = [["hello", "hello world"]];
+
+        test.each(okCases)("Matches '%s' against '%s'", (toMatch, source) => {
+            const result = exact(toMatch).parse(source);
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value[0]).toBe(toMatch);
+                    break;
+
+                case Result.Variant.Err:
+                    fail(result.error);
+            }
+        });
+
+        const errCases: Array<[string, string, string]> = [
+            [
+                "goodbye",
+                "hello world",
+                'Expected "goodbye" but got "hello w" instead',
+            ],
         ];
 
-        test.each(cases)(
-            "Tries to match '%s' against '%s' as expected",
-            (toMatch, source, shouldHaveMatched) => {
+        test.each(errCases)(
+            "Does not match '%s' against '%s'",
+            (toMatch, source, errMessage) => {
                 const result = exact(toMatch).parse(source);
-                expect(Result.isOk(result)).toBe(shouldHaveMatched);
+                switch (result.variant) {
+                    case Result.Variant.Err:
+                        expect(result.error).toBe(errMessage);
+                        break;
+
+                    case Result.Variant.Ok:
+                        fail("Should not have parsed");
+                }
             },
         );
     });
@@ -52,7 +76,7 @@ describe("Individual Parser functions", () => {
         ];
 
         test.each(cases)(
-            "chomps 0 or more whitespace from beginning",
+            "Matches zero or more whitespace characters",
             (source, remaining) => {
                 const result = spaces().parse(source);
                 switch (result.variant) {
@@ -65,6 +89,232 @@ describe("Individual Parser functions", () => {
                 }
             },
         );
+    });
+
+    describe("character classes", () => {
+        const {
+            digits,
+            singleDigit,
+            alpha,
+            singleAlpha,
+            upper,
+            singleUpper,
+            lower,
+            singleLower,
+            alphaNum,
+            singleAlphaNum,
+        } = Parser;
+
+        type TestCharClassesOptions = {
+            okCasesMessage: string;
+            errCasesMessage: string;
+            okCases: Array<[string, string, string]>;
+            errCases: Array<[string, string, string]>;
+        };
+        function testCharClasses(
+            singleParser: Parser<string>,
+            multipleParser: Parser<string>,
+            {
+                okCasesMessage,
+                errCasesMessage,
+                okCases,
+                errCases,
+            }: TestCharClassesOptions,
+        ) {
+            test.each(okCases)(
+                okCasesMessage,
+                (source, singleCase, multipleCase) => {
+                    let result = singleParser.parse(source);
+                    switch (result.variant) {
+                        case Result.Variant.Ok:
+                            expect(result.value[1]).toBe(singleCase);
+                            break;
+
+                        case Result.Variant.Err:
+                            fail(result.error);
+                    }
+
+                    result = multipleParser.parse(source);
+                    switch (result.variant) {
+                        case Result.Variant.Ok:
+                            expect(result.value[1]).toBe(multipleCase);
+                            break;
+
+                        case Result.Variant.Err:
+                            fail(result.error);
+                    }
+                },
+            );
+
+            test.each(errCases)(
+                errCasesMessage,
+                (source, singleCase, multipleCase) => {
+                    let result = singleParser.parse(source);
+                    switch (result.variant) {
+                        case Result.Variant.Err:
+                            expect(result.error).toBe(singleCase);
+                            break;
+
+                        case Result.Variant.Ok:
+                            fail("Should not have parsed");
+                    }
+
+                    result = multipleParser.parse(source);
+                    switch (result.variant) {
+                        case Result.Variant.Err:
+                            expect(result.error).toBe(multipleCase);
+                            break;
+
+                        case Result.Variant.Ok:
+                            fail("Should not have parsed");
+                    }
+                },
+            );
+        }
+
+        describe("digits and singleDigit", () => {
+            const okCases: Array<[string, string, string]> = [
+                ["012345", "12345", ""],
+                ["012345abcde", "12345abcde", "abcde"],
+                ["111", "11", ""],
+            ];
+
+            const errCases: Array<[string, string, string]> = [
+                [
+                    "",
+                    'Expected a digit but got "" instead',
+                    'Expected digits but got "" instead',
+                ],
+                [
+                    "abcde",
+                    'Expected a digit but got "a" instead',
+                    'Expected digits but got "a" instead',
+                ],
+            ];
+
+            testCharClasses(singleDigit(), digits(), {
+                okCasesMessage: "Matches digits in '%s'",
+                errCasesMessage: "Does not match any digits in '%s'",
+                okCases,
+                errCases,
+            });
+        });
+
+        describe("alpha and singleAlpha", () => {
+            const okCases: Array<[string, string, string]> = [
+                ["Abcde", "bcde", ""],
+                ["aBcDe012345", "BcDe012345", "012345"],
+                ["aAa", "Aa", ""],
+            ];
+
+            const errCases: Array<[string, string, string]> = [
+                [
+                    "",
+                    'Expected a character but got "" instead',
+                    'Expected characters but got "" instead',
+                ],
+                [
+                    "12345",
+                    'Expected a character but got "1" instead',
+                    'Expected characters but got "1" instead',
+                ],
+            ];
+
+            testCharClasses(singleAlpha(), alpha(), {
+                okCasesMessage: "Matches characters in '%s'",
+                errCasesMessage: "Does not match any characters in '%s'",
+                okCases,
+                errCases,
+            });
+        });
+
+        describe("upper and singleUpper", () => {
+            const okCases: Array<[string, string, string]> = [
+                ["ABCDE", "BCDE", ""],
+                ["ABCDE012345", "BCDE012345", "012345"],
+                ["AAA", "AA", ""],
+            ];
+
+            const errCases: Array<[string, string, string]> = [
+                [
+                    "",
+                    'Expected an upper case character but got "" instead',
+                    'Expected upper case characters but got "" instead',
+                ],
+                [
+                    "12345",
+                    'Expected an upper case character but got "1" instead',
+                    'Expected upper case characters but got "1" instead',
+                ],
+            ];
+
+            testCharClasses(singleUpper(), upper(), {
+                okCasesMessage: "Matches upper case characters in '%s'",
+                errCasesMessage:
+                    "Does not match any upper case characters in '%s'",
+                okCases,
+                errCases,
+            });
+        });
+
+        describe("lower and singleLower", () => {
+            const okCases: Array<[string, string, string]> = [
+                ["abcde", "bcde", ""],
+                ["abcde012345", "bcde012345", "012345"],
+                ["aaa", "aa", ""],
+            ];
+
+            const errCases: Array<[string, string, string]> = [
+                [
+                    "",
+                    'Expected a lower case character but got "" instead',
+                    'Expected lower case characters but got "" instead',
+                ],
+                [
+                    "12345",
+                    'Expected a lower case character but got "1" instead',
+                    'Expected lower case characters but got "1" instead',
+                ],
+            ];
+
+            testCharClasses(singleLower(), lower(), {
+                okCasesMessage: "Matches lower case characters in '%s'",
+                errCasesMessage:
+                    "Does not match any lower case characters in '%s'",
+                okCases,
+                errCases,
+            });
+        });
+
+        describe("alphaNum and singleAlphaNum", () => {
+            const okCases: Array<[string, string, string]> = [
+                ["abcde", "bcde", ""],
+                ["abcde012345", "bcde012345", ""],
+                ["aaa", "aa", ""],
+                ["2021years-03months", "021years-03months", "-03months"],
+            ];
+
+            const errCases: Array<[string, string, string]> = [
+                [
+                    "",
+                    'Expected an alpha numeric character but got "" instead',
+                    'Expected alpha numeric characters but got "" instead',
+                ],
+                [
+                    "$100",
+                    'Expected an alpha numeric character but got "$" instead',
+                    'Expected alpha numeric characters but got "$" instead',
+                ],
+            ];
+
+            testCharClasses(singleAlphaNum(), alphaNum(), {
+                okCasesMessage: "Matches alpha numeric characters in '%s'",
+                errCasesMessage:
+                    "Does not match any alpha numeric characters in '%s'",
+                okCases,
+                errCases,
+            });
+        });
     });
 
     describe("sequence", () => {
@@ -124,7 +374,7 @@ describe("Individual Parser functions", () => {
         ];
 
         test.each(cases)(
-            "Matches zero or more times",
+            "Matches with given parser zero or more times",
             (source, remaining, parser, matches) => {
                 const result = zeroOrMore(parser).parse(source);
 
