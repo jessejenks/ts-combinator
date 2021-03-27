@@ -117,6 +117,17 @@ export namespace Parser {
             return result ?? Result.Err("No parsers provided");
         });
     }
+
+    export const map = <A, B>(
+        func: (a: A) => B,
+        parser: Parser<A>,
+    ): Parser<B> =>
+        Parser<B>((source: string) =>
+            Result.map(
+                ([a, rest]: [A, string]): [B, string] => [func(a), rest],
+                parser.parse(source),
+            ),
+        );
 }
 
 export namespace Parser {

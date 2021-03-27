@@ -575,4 +575,65 @@ describe("Individual Parser functions", () => {
             }
         });
     });
+
+    describe("map", () => {
+        const { map } = Parser;
+
+        it("does nothing if given identity function", () => {
+            const result = map((x) => x, Parser.exact("anything")).parse(
+                "anything",
+            );
+
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value[0]).toEqual("anything");
+                    expect(result.value[1]).toBe("");
+                    break;
+
+                case Result.Variant.Err:
+                    fail(result.error);
+            }
+        });
+
+        it("can transform parsed values", () => {
+            const result = map(
+                (match: string) => ({ key: "annotation", match: match }),
+                Parser.exact("anything"),
+            ).parse("anything");
+
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value[0]).toEqual({
+                        key: "annotation",
+                        match: "anything",
+                    });
+                    expect(result.value[1]).toBe("");
+                    break;
+
+                case Result.Variant.Err:
+                    fail(result.error);
+            }
+        });
+
+        it("can remove unwanted pieces of parsed values", () => {
+            const result = map(
+                ([dig, , alph]) => [dig, alph],
+                Parser.sequence(
+                    Parser.digits(),
+                    Parser.exact("-"),
+                    Parser.alpha(),
+                ),
+            ).parse("123-abc");
+
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value[0]).toEqual(["123", "abc"]);
+                    expect(result.value[1]).toBe("");
+                    break;
+
+                case Result.Variant.Err:
+                    fail(result.error);
+            }
+        });
+    });
 });
