@@ -317,6 +317,143 @@ describe("Individual Parser functions", () => {
         });
     });
 
+    describe("numbers", () => {
+        describe("number and numberString", () => {
+            const { number, numberString } = Parser;
+
+            const okCases: Array<[string, string, string]> = [
+                ["12345 hello", "12345", " hello"],
+                ["3.14159 hello", "3.14159", " hello"],
+                ["+12", "+12", ""],
+                ["-12", "-12", ""],
+                ["+12.0", "+12.0", ""],
+                ["-12.0", "-12.0", ""],
+                ["0", "0", ""],
+                ["01234", "0", "1234"],
+                ["0.14159 hello", "0.14159", " hello"],
+            ];
+
+            test.each(okCases)(
+                "Parses '%s' as the string '%s'",
+                (source, match, remaining) => {
+                    const result = numberString().parse(source);
+
+                    switch (result.variant) {
+                        case Result.Variant.Ok:
+                            expect(result.value[0]).toBe(match);
+                            expect(result.value[1]).toBe(remaining);
+                            break;
+
+                        case Result.Variant.Err:
+                            fail(result.error);
+                    }
+                },
+            );
+
+            test.each(okCases)(
+                "Parses '%s' as the number %d",
+                (source, match, remaining) => {
+                    const result = number().parse(source);
+
+                    switch (result.variant) {
+                        case Result.Variant.Ok:
+                            expect(result.value[0]).toBe(Number(match));
+                            expect(result.value[1]).toBe(remaining);
+                            break;
+
+                        case Result.Variant.Err:
+                            fail(result.error);
+                    }
+                },
+            );
+
+            // error messages could be improved
+            const errCases: Array<[string, string]> = [
+                ["bob", 'Expected a number but got "b" instead'],
+                [".14159", 'Expected a number but got "." instead'],
+                ["+hello", 'Expected a number but got "+" instead'],
+            ];
+
+            test.each(errCases)(
+                "Does not parse '%s' as a string",
+                (source, errMessage) => {
+                    const result = numberString().parse(source);
+
+                    switch (result.variant) {
+                        case Result.Variant.Err:
+                            expect(result.error).toBe(errMessage);
+                            break;
+
+                        case Result.Variant.Ok:
+                            fail("Should not have parsed");
+                    }
+                },
+            );
+
+            test.each(errCases)(
+                "Does not parse '%s' as a number",
+                (source, errMessage) => {
+                    const result = number().parse(source);
+
+                    switch (result.variant) {
+                        case Result.Variant.Err:
+                            expect(result.error).toBe(errMessage);
+                            break;
+
+                        case Result.Variant.Ok:
+                            fail("Should not have parsed");
+                    }
+                },
+            );
+        });
+
+        describe("int", () => {
+            const { int } = Parser;
+
+            it("parses a number, then checks for an int", () => {
+                let result = int().parse("12345 hello");
+                switch (result.variant) {
+                    case Result.Variant.Ok:
+                        expect(result.value[0]).toBe(12345);
+                        expect(result.value[1]).toBe(" hello");
+                        break;
+
+                    case Result.Variant.Err:
+                        fail(result.error);
+                }
+
+                result = int().parse("123.1415 hello");
+                switch (result.variant) {
+                    case Result.Variant.Err:
+                        expect(result.error).toBe(
+                            'Expected an integer but got "123.1415" instead',
+                        );
+                        break;
+
+                    case Result.Variant.Ok:
+                        fail("Should not have parsed");
+                }
+            });
+        });
+
+        describe("integerPart", () => {
+            const { integerPart } = Parser;
+
+            it("greedily captures the integer part and returns a string", () => {
+                const result = integerPart().parse("123.1415 hello");
+                switch (result.variant) {
+                    case Result.Variant.Ok:
+                        expect(result.value[0]).toBe("123");
+                        expect(result.value[1]).toBe(".1415 hello");
+                        break;
+
+                    case Result.Variant.Err:
+                        fail(result.error);
+                }
+            });
+        });
+    });
+
     describe("sequence", () => {
         const { sequence } = Parser;
 

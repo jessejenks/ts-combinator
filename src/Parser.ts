@@ -60,6 +60,32 @@ export namespace Parser {
     export const singleAlphaNum = (): Parser<string> =>
         fromRegExp(/[a-zA-Z0-9]/, "an alpha numeric character");
 
+    export const numberString = (): Parser<string> =>
+        fromRegExp(/(\+|-)?(0|[1-9]\d*)(\.\d+)?/, "a number");
+
+    export const integerPart = (): Parser<string> =>
+        fromRegExp(/(\+|-)?(0|[1-9]\d*)/, "an integer");
+
+    export const number = (): Parser<number> =>
+        map(Number, fromRegExp(/(\+|-)?(0|[1-9]\d*)(\.\d+)?/, "a number"));
+
+    export const int = (): Parser<number> =>
+        Parser<number>((source: string) => {
+            const result = number().parse(source);
+            switch (result.variant) {
+                case Result.Variant.Err:
+                    return result;
+
+                case Result.Variant.Ok:
+                    if (!Number.isSafeInteger(result.value[0])) {
+                        return Result.Err(
+                            `Expected an integer but got "${result.value[0]}" instead`,
+                        );
+                    }
+                    return result;
+            }
+        });
+
     const fromRegExp = (re: RegExp, expected: string) =>
         Parser<string>((source: string) => {
             const match = new RegExp(`^${re.source}`).exec(source);

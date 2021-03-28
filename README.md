@@ -34,8 +34,8 @@ function parseDate(source: string) {
 
 This is fairly readable and maintainable.
 
-But now suppose we want to match not just dates like "2021-03-26", but also
-dates like "2021/03/26".
+But now suppose we want to match not just dates like `"2021-03-26"`, but also
+dates like `"2021/03/26"`.
 
 Ok no problem, just a small update.
 
@@ -54,8 +54,8 @@ function parseDate(source: string) {
 
 Just a little bit harder to read, but ok fine.
 
-But we have introduces a small problem. Now we match strings like "2021-03/26"
-and "2021/03-26"! Maybe this is ok and maybe it isn't. How would we update our
+But we have introduces a small problem. Now we match strings like `"2021-03/26"`
+and `"2021/03-26"`! Maybe this is ok and maybe it isn't. How would we update our
 regular expression now?
 
 ```ts
@@ -77,10 +77,10 @@ The situation can be improved somewhat with an explicit `RegExp` constructor and
 template strings.
 
 ```ts
-const year = /\d{4}/;
-const month = /\d{2}/;
-const day = /\d{2}/;
-const re =  new RegExp(`^(${year.source})((-(${month.source})-(${day.source}))|(\\/(${month.source})\\/(${day.source})))`)
+const year = /\d{4}/.source;
+const month = /\d{2}/.source;
+const day = /\d{2}/.source;
+const re =  new RegExp(`^(${year})((-(${month})-(${day}))|(\\/(${month})\\/(${day})))`)
 ```
 
 But what happens if we want to support more separators? How much time would we
@@ -90,8 +90,8 @@ spend trying to figure out how this works in a year from now?
 
 Now compare this to using `ts-combinator`.
 
-Here is the "simple" date parser that matched "2021-03-26" and "2021/03/26", but
-also "2021-03/26".
+Here is the simpler date parser that matched `"2021-03-26"` and `"2021/03/26"`, but
+also `"2021-03/26"`.
 
 ```ts
 type Year = { year: string };
@@ -134,19 +134,16 @@ And the more complex date parser that ensures separator consistency?
 
 ```ts
 const dateParser = map(
-        ([year, [, month, , day]]): DateObject => ({
-            ...year,
-            ...month,
-            ...day,
-        }),
-        sequence(
-            yearParser,
-            oneOf(
-                sequence(exact("-"), monthParser, exact("-"), dayParser),
-                sequence(exact("/"), monthParser, exact("/"), dayParser),
-            ),
+    ([year, [, month, , day]]): DateObject => ({ ...year, ...month, ...day }),
+    sequence(
+        yearParser,
+        oneOf(
+            sequence(exact("-"), monthParser, exact("-"), dayParser),
+            sequence(exact("/"), monthParser, exact("/"), dayParser),
         ),
-    );
+    ),
+);
+
 ```
 
 And adding new separators?
@@ -161,11 +158,7 @@ const monthDayWithSeparator = (
 ) => sequence(sep, month, sep, day);
 
 const dateParser = map(
-    ([year, [, month, , day]]): DateObject => ({
-        ...year,
-        ...month,
-        ...day,
-    }),
+    ([year, [, month, , day]]): DateObject => ({ ...year, ...month, ...day }),
     sequence(
         yearParser,
         oneOf(
@@ -224,8 +217,21 @@ As long as `cleanInput` is pure, `eval` will be pure. But now `eval` is not a
 combinator. Instead, this is a pure [closure](https://whatthefuck.is/closure).
 
 # Changelog
-## [0.1.0][v0.1.0] : 2021-03-26
-- Added changelog!
-- Initial release
 
-[v0.1.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v0.1.0
+## [Unreleased]
+- Number parsers
+
+### Changed
+- Updated changelog section to match format from
+  ["keep a changelog"](https://keepachangelog.com/en/1.0.0/)
+
+## [0.1.0] : 2021-03-26
+
+### Added
+- Changelog
+- Initial release!
+- Some atomic parsers
+- Basic Combinators to parse regular languages
+
+[Unreleased]: https://github.com/jessejenks/ts-combinator/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v0.1.0
