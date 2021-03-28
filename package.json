@@ -1,10 +1,17 @@
 {
     "name": "ts-combinator",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "description": "simple typescript combinator library",
     "main": "dist/index.js",
     "module": "dist/index.cjs.js",
     "source": "src/index.ts",
+    "repository": "git//github.com/jessejenks/ts-config.git",
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
+    },
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "test": "jest --watchAll",
         "build:js": "rollup --config",

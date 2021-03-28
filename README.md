@@ -219,6 +219,10 @@ combinator. Instead, this is a pure [closure](https://whatthefuck.is/closure).
 # Changelog
 
 ## [Unreleased]
+
+## [1.0.0] : 2021-03-27
+
+## Added
 - Number parsers
 - "maybe" parser
 
@@ -234,5 +238,6 @@ combinator. Instead, this is a pure [closure](https://whatthefuck.is/closure).
 - Some atomic parsers
 - Basic Combinators to parse regular languages
 
-[Unreleased]: https://github.com/jessejenks/ts-combinator/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/jessejenks/ts-combinator/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v1.0.0
 [0.1.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v0.1.0
