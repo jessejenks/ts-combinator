@@ -3,9 +3,13 @@
     "version": "0.1.0",
     "description": "simple typescript combinator library",
     "main": "dist/index.js",
+    "module": "dist/index.cjs.js",
+    "source": "src/index.ts",
     "scripts": {
         "test": "jest --watchAll",
-        "build": "tsc --project ./"
+        "build:js": "rollup --config",
+        "build:types": "tsc --project ./ --emitDeclarationOnly",
+        "build": "npm run build:types && npm run build:js"
     },
     "keywords": [
         "parser",
@@ -26,5 +30,10 @@
         "rollup": "2.43.0",
         "ts-jest": "26.5.2",
         "typescript": "4.2.2"
-    }
+    },
+    "browserslist": [
+        ">0.2%",
+        "not dead",
+        "not op_mini all"
+    ]
 }
