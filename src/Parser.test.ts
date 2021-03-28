@@ -773,4 +773,85 @@ describe("Individual Parser functions", () => {
             }
         });
     });
+
+    describe("maybe", () => {
+        const { maybe } = Parser;
+
+        it("parses with or goes with a default value", () => {
+            const result = maybe(Parser.exact("abcde"), "default").parse(
+                "abcdnope",
+            );
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value[0]).toEqual("default");
+                    break;
+
+                case Result.Variant.Err:
+                    fail(result.error);
+            }
+        });
+
+        describe("with 'sequence' and 'oneOf'", () => {
+            const { sequence, oneOf, exact } = Parser;
+            const parser = sequence(
+                maybe(exact("-"), "+"),
+                maybe(exact("("), "["),
+                maybe(oneOf(exact("a"), exact("c")), "d"),
+                exact("blah"),
+            );
+
+            const okCases: Array<[string, string[]]> = [
+                ["blah", ["+", "[", "d", "blah"]],
+                ["-blah", ["-", "[", "d", "blah"]],
+                ["(blah", ["+", "(", "d", "blah"]],
+                ["-(blah", ["-", "(", "d", "blah"]],
+
+                ["ablah", ["+", "[", "a", "blah"]],
+                ["-ablah", ["-", "[", "a", "blah"]],
+                ["(ablah", ["+", "(", "a", "blah"]],
+                ["-(ablah", ["-", "(", "a", "blah"]],
+
+                ["cblah", ["+", "[", "c", "blah"]],
+                ["-cblah", ["-", "[", "c", "blah"]],
+                ["(cblah", ["+", "(", "c", "blah"]],
+                ["-(cblah", ["-", "(", "c", "blah"]],
+            ];
+
+            test.each(okCases)(
+                "Parses with 'maybe', 'sequence', and 'oneOf'",
+                (source, matches) => {
+                    const result = parser.parse(source);
+                    switch (result.variant) {
+                        case Result.Variant.Ok:
+                            expect(result.value[0]).toEqual(matches);
+                            break;
+
+                        case Result.Variant.Err:
+                            fail(result.error);
+                    }
+                },
+            );
+
+            const errCases: Array<[string, string]> = [
+                ["(-blah", 'Expected "blah" but got "-bla" instead'],
+                ["(-ablah", 'Expected "blah" but got "-abl" instead'],
+                ["(-cblah", 'Expected "blah" but got "-cbl" instead'],
+            ];
+
+            test.each(errCases)(
+                "Does not parser as expected",
+                (source, errMessage) => {
+                    const result = parser.parse(source);
+                    switch (result.variant) {
+                        case Result.Variant.Err:
+                            expect(result.error).toEqual(errMessage);
+                            break;
+
+                        case Result.Variant.Ok:
+                            fail("Should not have parsed");
+                    }
+                },
+            );
+        });
+    });
 });

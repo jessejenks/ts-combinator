@@ -220,6 +220,7 @@ combinator. Instead, this is a pure [closure](https://whatthefuck.is/closure).
 
 ## [Unreleased]
 - Number parsers
+- "maybe" parser
 
 ### Changed
 - Updated changelog section to match format from

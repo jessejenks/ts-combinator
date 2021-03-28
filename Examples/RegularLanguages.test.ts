@@ -1,15 +1,7 @@
 import { Result } from "../src/Result";
 import { Parser } from "../src/Parser";
 
-const {
-    map,
-    exact,
-    sequence,
-    oneOf,
-    zeroOrMore,
-    singleDigit,
-    succeed,
-} = Parser;
+const { map, exact, sequence, oneOf, zeroOrMore, singleDigit, maybe } = Parser;
 
 describe("simple regular expression /a(b|c)d*/", () => {
     const parser = map(
@@ -184,19 +176,19 @@ describe("simple regular expression for phone numbers", () => {
             ...end,
         }),
         sequence(
-            oneOf(exact("+"), succeed("")),
-            oneOf(exact("("), succeed("")),
+            maybe(exact("+"), ""),
+            maybe(exact("("), ""),
             map(
                 (start): PhoneStart => ({ startBit: start.join("") }),
                 sequence(singleDigit(), singleDigit(), singleDigit()),
             ),
-            oneOf(exact(")"), succeed("")),
-            oneOf(exact("-"), exact("."), exact(" "), succeed("")),
+            maybe(exact(")"), ""),
+            maybe(oneOf(exact("-"), exact("."), exact(" ")), ""),
             map(
                 (middle): PhoneMiddle => ({ middleBit: middle.join("") }),
                 sequence(singleDigit(), singleDigit(), singleDigit()),
             ),
-            oneOf(exact("-"), exact("."), exact(" "), succeed("")),
+            maybe(oneOf(exact("-"), exact("."), exact(" ")), ""),
             map(
                 (end): PhoneEnd => ({ endBit: end.join("") }),
                 sequence(
@@ -204,8 +196,8 @@ describe("simple regular expression for phone numbers", () => {
                     singleDigit(),
                     singleDigit(),
                     singleDigit(),
-                    oneOf(singleDigit(), succeed("")),
-                    oneOf(singleDigit(), succeed("")),
+                    maybe(singleDigit(), ""),
+                    maybe(singleDigit(), ""),
                 ),
             ),
         ),
@@ -228,11 +220,11 @@ describe("simple regular expression for phone numbers", () => {
         ],
     ];
 
-    test.each(okCases)("Parses phone number from '%s'", (source, matche) => {
+    test.each(okCases)("Parses phone number from '%s'", (source, matches) => {
         const result = parser.parse(source);
         switch (result.variant) {
             case Result.Variant.Ok:
-                expect(result.value[0]).toEqual(matche);
+                expect(result.value[0]).toEqual(matches);
                 break;
 
             case Result.Variant.Err:

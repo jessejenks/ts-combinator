@@ -130,8 +130,8 @@ export namespace Parser {
             return Result.Ok([results, source]);
         });
 
-    export function oneOf<T>(...parsers: Parser<T>[]): Parser<T> {
-        return Parser((source: string) => {
+    export const oneOf = <T>(...parsers: Parser<T>[]): Parser<T> =>
+        Parser((source: string) => {
             let result: Result<[T, string], string> | null = null;
             for (let i = 0; i < parsers.length; i++) {
                 const parser = parsers[i];
@@ -142,7 +142,6 @@ export namespace Parser {
             }
             return result ?? Result.Err("No parsers provided");
         });
-    }
 
     export const map = <A, B>(
         func: (a: A) => B,
@@ -154,6 +153,9 @@ export namespace Parser {
                 parser.parse(source),
             ),
         );
+
+    export const maybe = <T>(parser: Parser<T>, defaultValue: T): Parser<T> =>
+        oneOf(parser, succeed(defaultValue));
 }
 
 export namespace Parser {
