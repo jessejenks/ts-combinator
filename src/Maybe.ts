@@ -1,3 +1,6 @@
+/**
+ * A type for holding data which may or may not may not have a value.
+ */
 export type Maybe<T> = Maybe.Just<T> | Maybe.Nothing;
 
 export namespace Maybe {

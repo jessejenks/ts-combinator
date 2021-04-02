@@ -1,3 +1,7 @@
+/**
+ * A type for holding the result of a process which can either succeed or fail.
+ * These cases are referred to as Ok and Err respectively
+ */
 export type Result<T, E> = Result.Ok<T> | Result.Err<E>;
 
 export namespace Result {
@@ -38,6 +42,12 @@ export namespace Result {
         return result.variant === Variant.Err;
     }
 
+    /**
+     * Takes the value from an Ok result and transforms it based on the given function.
+     * Acts like identity function in Err case
+     * @param f the function for mapping the output of the given result
+     * @param result the result whose Ok value you want to map
+     */
     export const map = <A, B, E>(
         f: (a: A) => B,
         result: Result<A, E>,
