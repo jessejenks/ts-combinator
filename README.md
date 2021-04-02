@@ -220,10 +220,16 @@ combinator. Instead, this is a pure [closure](https://whatthefuck.is/closure).
 
 ## [Unreleased]
 
+## [2.2.0] : 2021-04-02
+
+### Added
+- documentation
+
 ## [2.1.0] : 2021-04-01
 
 ### Added
 - `lazy` combinator
+- Casing converter example
 
 ## [2.0.0] : 2021-04-01
 
@@ -252,7 +258,8 @@ combinator. Instead, this is a pure [closure](https://whatthefuck.is/closure).
 - Some atomic parsers
 - Basic Combinators to parse regular languages
 
-[Unreleased]: https://github.com/jessejenks/ts-combinator/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/jessejenks/ts-combinator/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v2.2.0
 [2.1.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v2.1.0
 [2.0.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v2.0.0
 [1.0.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v1.0.0

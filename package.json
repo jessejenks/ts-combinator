@@ -1,6 +1,6 @@
 {
     "name": "@jessejenks/ts-combinator",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "description": "simple typescript combinator library",
     "main": "dist/index.js",
     "module": "dist/index.cjs.js",
