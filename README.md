@@ -220,6 +220,9 @@ combinator. Instead, this is a pure [closure](https://whatthefuck.is/closure).
 
 ## [Unreleased]
 
+### Added
+- Maybe type
+
 ### Changed
 - Renamed `maybe` to `optional`
 
