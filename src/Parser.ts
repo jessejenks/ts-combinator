@@ -162,6 +162,9 @@ export namespace Parser {
 
     export const maybe = <T>(parser: Parser<T>): Parser<Maybe<T>> =>
         oneOf<Maybe<T>>(map(Maybe.Just, parser), succeed(Maybe.Nothing()));
+
+    export const lazy = <T>(factory: () => Parser<T>): Parser<T> =>
+        Parser<T>((source: string) => factory().parse(source));
 }
 
 export namespace Parser {
