@@ -222,6 +222,7 @@ combinator. Instead, this is a pure [closure](https://whatthefuck.is/closure).
 
 ### Added
 - Maybe type
+- proper maybe combinator
 
 ### Changed
 - Renamed `maybe` to `optional`
@@ -230,7 +231,7 @@ combinator. Instead, this is a pure [closure](https://whatthefuck.is/closure).
 
 ### Added
 - Number parsers
-- "maybe" parser
+- "maybe" combinator
 
 ### Changed
 - Updated changelog section to match format from

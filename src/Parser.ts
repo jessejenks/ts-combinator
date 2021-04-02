@@ -1,3 +1,4 @@
+import { Maybe } from "./Maybe";
 import { Result } from "./Result";
 
 type ParseResult<T> = Result<[T, string], string>;
@@ -158,6 +159,9 @@ export namespace Parser {
         parser: Parser<T>,
         defaultValue: T,
     ): Parser<T> => oneOf(parser, succeed(defaultValue));
+
+    export const maybe = <T>(parser: Parser<T>): Parser<Maybe<T>> =>
+        oneOf<Maybe<T>>(map(Maybe.Just, parser), succeed(Maybe.Nothing()));
 }
 
 export namespace Parser {

@@ -9,6 +9,7 @@ const {
     zeroOrMore,
     singleDigit,
     optional,
+    maybe,
 } = Parser;
 
 describe("simple regular expression /a(b|c)d*/", () => {
@@ -184,19 +185,19 @@ describe("simple regular expression for phone numbers", () => {
             ...end,
         }),
         sequence(
-            optional(exact("+"), ""),
-            optional(exact("("), ""),
+            maybe(exact("+")),
+            maybe(exact("(")),
             map(
                 (start): PhoneStart => ({ startBit: start.join("") }),
                 sequence(singleDigit(), singleDigit(), singleDigit()),
             ),
-            optional(exact(")"), ""),
-            optional(oneOf(exact("-"), exact("."), exact(" ")), ""),
+            maybe(exact(")")),
+            maybe(oneOf(exact("-"), exact("."), exact(" "))),
             map(
                 (middle): PhoneMiddle => ({ middleBit: middle.join("") }),
                 sequence(singleDigit(), singleDigit(), singleDigit()),
             ),
-            optional(oneOf(exact("-"), exact("."), exact(" ")), ""),
+            maybe(oneOf(exact("-"), exact("."), exact(" "))),
             map(
                 (end): PhoneEnd => ({ endBit: end.join("") }),
                 sequence(
