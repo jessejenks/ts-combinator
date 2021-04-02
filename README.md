@@ -220,9 +220,11 @@ combinator. Instead, this is a pure [closure](https://whatthefuck.is/closure).
 
 ## [Unreleased]
 
+## [2.0.0] : 2021-04-01
+
 ### Added
-- Maybe type
-- proper maybe combinator
+- `Maybe` type
+- proper `maybe` combinator
 
 ### Changed
 - Renamed `maybe` to `optional`
@@ -231,7 +233,7 @@ combinator. Instead, this is a pure [closure](https://whatthefuck.is/closure).
 
 ### Added
 - Number parsers
-- "maybe" combinator
+- `maybe` combinator
 
 ### Changed
 - Updated changelog section to match format from
@@ -245,6 +247,7 @@ combinator. Instead, this is a pure [closure](https://whatthefuck.is/closure).
 - Some atomic parsers
 - Basic Combinators to parse regular languages
 
-[Unreleased]: https://github.com/jessejenks/ts-combinator/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/jessejenks/ts-combinator/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v2.0.0
 [1.0.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v1.0.0
 [0.1.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v0.1.0
