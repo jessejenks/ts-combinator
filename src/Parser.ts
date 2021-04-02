@@ -3,16 +3,16 @@ import { Result } from "./Result";
 
 /**
  * A wrapper on the `Result` type, and the return type of the `parse` method on any parser.
- * In the `Ok` case, `ParseResult` returns the parsed values and the remaining input, and in the `Err` case returns an
- * error message as a string.
+ * In the `Ok` case, `ParseResult` returns the parsed value, the current index, the original input.
+ * In the `Err` case returns an error message as a string.
  *
  * @example
  * ```ts
- * const result: ParseResult<number> = int().parse("123rest of input");
- * // Result.Ok<[number, string]>([123, "rest of input"])
+ * const result: ParseResult<string> = exact("hello").parse("hellorest of input");
+ * // Result.Ok<[string, number, string]>(["hello", 5, "hellorest of input"])
  * ```
  */
-export type ParseResult<T> = Result<[T, string], string>;
+export type ParseResult<T> = Result<[T, number, string], string>;
 
 /**
  * The main `Parser` type.
@@ -24,7 +24,7 @@ export type ParseResult<T> = Result<[T, string], string>;
  * @see ParseResult
  */
 export type Parser<T> = {
-    parse: (source: string) => ParseResult<T>;
+    parse: (source: string, index?: number) => ParseResult<T>;
 };
 
 /**
@@ -41,7 +41,7 @@ export namespace Parser {
      * @see ParseResult
      */
     export function Parser<T>(
-        parse: (source: string) => ParseResult<T>,
+        parse: (source: string, index?: number) => ParseResult<T>,
     ): Parser<T> {
         return { parse };
     }
@@ -51,14 +51,14 @@ export namespace Parser {
      * @param toMatch the exact string to match
      */
     export const exact = (toMatch: string): Parser<string> =>
-        Parser<string>((source: string) => {
-            if (source.slice(0, toMatch.length) === toMatch) {
-                return Result.Ok([toMatch, source.slice(toMatch.length)]);
+        Parser<string>((source: string, index: number = 0) => {
+            if (source.slice(index, index + toMatch.length) === toMatch) {
+                return Result.Ok([toMatch, index + toMatch.length, source]);
             }
             return Result.Err(
                 `Expected "${toMatch}" but got "${source.slice(
-                    0,
-                    toMatch.length,
+                    index,
+                    index + toMatch.length,
                 )}" instead`,
             );
         });
@@ -77,7 +77,9 @@ export namespace Parser {
      * ```
      */
     export const succeed = <T>(value: T): Parser<T> =>
-        Parser<T>((source: string) => Result.Ok([value, source]));
+        Parser<T>((source: string, index: number = 0) =>
+            Result.Ok([value, index, source]),
+        );
 
     /**
      * A parser for reading zero or more whitespace characters.
@@ -181,8 +183,8 @@ export namespace Parser {
      * number was an integer.
      */
     export const int = (): Parser<number> =>
-        Parser<number>((source: string) => {
-            const result = number().parse(source);
+        Parser<number>((source: string, index: number = 0) => {
+            const result = number().parse(source, index);
             switch (result.variant) {
                 case Result.Variant.Err:
                     return result;
@@ -198,19 +200,18 @@ export namespace Parser {
         });
 
     const fromRegExp = (re: RegExp, expected: string) =>
-        Parser<string>((source: string) => {
-            const match = new RegExp(`^${re.source}`).exec(source);
+        Parser<string>((source: string, index: number = 0) => {
+            const match = new RegExp(`^${re.source}`).exec(source.slice(index));
             if (match === null) {
                 return Result.Err(
                     `Expected ${expected} but got "${source.charAt(
-                        0,
+                        index,
                     )}" instead`,
                 );
             }
 
             const [matched] = match;
-            const rest = source.slice(match.index + matched.length);
-            return Result.Ok([matched, rest]);
+            return Result.Ok([matched, index + matched.length, source]);
         });
 
     /**
@@ -221,15 +222,16 @@ export namespace Parser {
      * @param parser The parser to use for matching zero or more times
      */
     export const zeroOrMore = <T>(parser: Parser<T>) =>
-        Parser<T[]>((source: string) => {
+        Parser<T[]>((source: string, index: number = 0) => {
             const results: T[] = [];
-            let result: ParseResult<T> = parser.parse(source);
+            let result: ParseResult<T> = parser.parse(source, index);
             while (Result.isOk(result)) {
-                results.push(result.value[0]);
-                source = result.value[1];
-                result = parser.parse(source);
+                const [value, newIndex] = result.value;
+                results.push(value);
+                index = newIndex;
+                result = parser.parse(source, index);
             }
-            return Result.Ok([results, source]);
+            return Result.Ok([results, index, source]);
         });
 
     /**
@@ -240,19 +242,20 @@ export namespace Parser {
      * @param parser The parser to use for matching one or more times
      */
     export const oneOrMore = <T>(parser: Parser<T>) =>
-        Parser<T[]>((source: string) => {
+        Parser<T[]>((source: string, index: number = 0) => {
             const results: T[] = [];
-            let result: ParseResult<T> = parser.parse(source);
+            let result: ParseResult<T> = parser.parse(source, index);
             if (Result.isErr(result)) {
                 return result;
             }
 
             while (Result.isOk(result)) {
-                results.push(result.value[0]);
-                source = result.value[1];
-                result = parser.parse(source);
+                const [value, newIndex] = result.value;
+                results.push(value);
+                index = newIndex;
+                result = parser.parse(source, index);
             }
-            return Result.Ok([results, source]);
+            return Result.Ok([results, index, source]);
         });
 
     /**
@@ -263,11 +266,11 @@ export namespace Parser {
      * @param parsers The list of parsers to use
      */
     export const oneOf = <T>(...parsers: Parser<T>[]): Parser<T> =>
-        Parser((source: string) => {
-            let result: Result<[T, string], string> | null = null;
+        Parser((source: string, index: number = 0) => {
+            let result: ParseResult<T> | null = null;
             for (let i = 0; i < parsers.length; i++) {
                 const parser = parsers[i];
-                result = parser.parse(source);
+                result = parser.parse(source, index);
                 if (Result.isOk(result)) {
                     return result;
                 }
@@ -284,10 +287,14 @@ export namespace Parser {
         func: (a: A) => B,
         parser: Parser<A>,
     ): Parser<B> =>
-        Parser<B>((source: string) =>
+        Parser<B>((source: string, index: number = 0) =>
             Result.map(
-                ([a, rest]: [A, string]): [B, string] => [func(a), rest],
-                parser.parse(source),
+                ([a, i]: [A, number, string]): [B, number, string] => [
+                    func(a),
+                    i,
+                    source,
+                ],
+                parser.parse(source, index),
             ),
         );
 
@@ -316,7 +323,9 @@ export namespace Parser {
      * @param factory A function which returns a parser
      */
     export const lazy = <T>(factory: () => Parser<T>): Parser<T> =>
-        Parser<T>((source: string) => factory().parse(source));
+        Parser<T>((source: string, index: number = 0) =>
+            factory().parse(source, index),
+        );
 }
 
 export namespace Parser {
@@ -490,24 +499,22 @@ export namespace Parser {
      * @param parsers The sequence of parsers to attempt
      */
     export function sequence<T>(...parsers: Parser<T>[]): Parser<T[]> {
-        return Parser((source: string) => {
+        return Parser((source: string, index: number = 0) => {
             const values: T[] = new Array(parsers.length);
-            let remaining = source;
             let result: ParseResult<T>;
             for (let i = 0; i < parsers.length; i++) {
-                result = parsers[i].parse(remaining);
-
+                result = parsers[i].parse(source, index);
                 switch (result.variant) {
                     case Result.Variant.Err:
                         return result;
 
                     case Result.Variant.Ok:
-                        const [value, rest] = result.value;
+                        const [value, newIndex] = result.value;
                         values[i] = value;
-                        remaining = rest;
+                        index = newIndex;
                 }
             }
-            return Result.Ok([values, remaining]);
+            return Result.Ok([values, index, source]);
         });
     }
 }

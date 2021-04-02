@@ -57,7 +57,7 @@ describe("Individual Parser functions", () => {
             switch (result.variant) {
                 case Result.Variant.Ok:
                     expect(result.value[0]).toBe(value);
-                    expect(result.value[1]).toBe(source);
+                    expect(source.slice(result.value[1])).toBe(source);
                     break;
 
                 case Result.Variant.Err:
@@ -82,7 +82,7 @@ describe("Individual Parser functions", () => {
                 const result = spaces().parse(source);
                 switch (result.variant) {
                     case Result.Variant.Ok:
-                        expect(result.value[1]).toBe(remaining);
+                        expect(source.slice(result.value[1])).toBe(remaining);
                         break;
 
                     case Result.Variant.Err:
@@ -128,7 +128,9 @@ describe("Individual Parser functions", () => {
                     let result = singleParser.parse(source);
                     switch (result.variant) {
                         case Result.Variant.Ok:
-                            expect(result.value[1]).toBe(singleCase);
+                            expect(source.slice(result.value[1])).toBe(
+                                singleCase,
+                            );
                             break;
 
                         case Result.Variant.Err:
@@ -138,7 +140,9 @@ describe("Individual Parser functions", () => {
                     result = multipleParser.parse(source);
                     switch (result.variant) {
                         case Result.Variant.Ok:
-                            expect(result.value[1]).toBe(multipleCase);
+                            expect(source.slice(result.value[1])).toBe(
+                                multipleCase,
+                            );
                             break;
 
                         case Result.Variant.Err:
@@ -342,7 +346,9 @@ describe("Individual Parser functions", () => {
                     switch (result.variant) {
                         case Result.Variant.Ok:
                             expect(result.value[0]).toBe(match);
-                            expect(result.value[1]).toBe(remaining);
+                            expect(source.slice(result.value[1])).toBe(
+                                remaining,
+                            );
                             break;
 
                         case Result.Variant.Err:
@@ -359,7 +365,9 @@ describe("Individual Parser functions", () => {
                     switch (result.variant) {
                         case Result.Variant.Ok:
                             expect(result.value[0]).toBe(Number(match));
-                            expect(result.value[1]).toBe(remaining);
+                            expect(source.slice(result.value[1])).toBe(
+                                remaining,
+                            );
                             break;
 
                         case Result.Variant.Err:
@@ -412,11 +420,12 @@ describe("Individual Parser functions", () => {
             const { int } = Parser;
 
             it("parses a number, then checks for an int", () => {
-                let result = int().parse("12345 hello");
+                const source = "12345 hello";
+                let result = int().parse(source);
                 switch (result.variant) {
                     case Result.Variant.Ok:
                         expect(result.value[0]).toBe(12345);
-                        expect(result.value[1]).toBe(" hello");
+                        expect(source.slice(result.value[1])).toBe(" hello");
                         break;
 
                     case Result.Variant.Err:
@@ -441,11 +450,14 @@ describe("Individual Parser functions", () => {
             const { integerPart } = Parser;
 
             it("greedily captures the integer part and returns a string", () => {
-                const result = integerPart().parse("123.1415 hello");
+                const source = "123.1415 hello";
+                const result = integerPart().parse(source);
                 switch (result.variant) {
                     case Result.Variant.Ok:
                         expect(result.value[0]).toBe("123");
-                        expect(result.value[1]).toBe(".1415 hello");
+                        expect(source.slice(result.value[1])).toBe(
+                            ".1415 hello",
+                        );
                         break;
 
                     case Result.Variant.Err:
@@ -459,15 +471,16 @@ describe("Individual Parser functions", () => {
         const { sequence } = Parser;
 
         it("can run a basic sequence of parsers", () => {
+            const source = "yes, and";
             const result = sequence(
                 Parser.exact("yes,"),
                 Parser.spaces(),
-            ).parse("yes, and");
+            ).parse(source);
 
             switch (result.variant) {
                 case Result.Variant.Ok:
                     expect(result.value[0]).toEqual(["yes,", " "]);
-                    expect(result.value[1]).toBe("and");
+                    expect(source.slice(result.value[1])).toBe("and");
                     break;
 
                 case Result.Variant.Err:
@@ -519,7 +532,7 @@ describe("Individual Parser functions", () => {
                 switch (result.variant) {
                     case Result.Variant.Ok:
                         expect(result.value[0]).toEqual(matches);
-                        expect(result.value[1]).toBe(remaining);
+                        expect(source.slice(result.value[1])).toBe(remaining);
                         break;
 
                     case Result.Variant.Err:
@@ -550,7 +563,7 @@ describe("Individual Parser functions", () => {
                 switch (result.variant) {
                     case Result.Variant.Ok:
                         expect(result.value[0]).toEqual(matches);
-                        expect(result.value[1]).toBe(remaining);
+                        expect(source.slice(result.value[1])).toBe(remaining);
                         break;
 
                     case Result.Variant.Err:
@@ -597,20 +610,22 @@ describe("Individual Parser functions", () => {
         });
 
         it("acts like the underlying parser if only one parser is provided", () => {
+            let source = "abc";
             const parser = oneOf(Parser.exact("a"));
-            let result = parser.parse("abc");
+            let result = parser.parse(source);
 
             switch (result.variant) {
                 case Result.Variant.Ok:
                     expect(result.value[0]).toEqual("a");
-                    expect(result.value[1]).toBe("bc");
+                    expect(source.slice(result.value[1])).toBe("bc");
                     break;
 
                 case Result.Variant.Err:
                     fail(result.error);
             }
 
-            result = parser.parse("bcd");
+            source = "bcd";
+            result = parser.parse(source);
 
             switch (result.variant) {
                 case Result.Variant.Err:
@@ -631,43 +646,47 @@ describe("Individual Parser functions", () => {
 
             const parser = oneOf(parseA, parseB, parseC);
 
-            let result = parser.parse("abc");
+            let source = "abc";
+            let result = parser.parse(source);
 
             switch (result.variant) {
                 case Result.Variant.Ok:
                     expect(result.value[0]).toEqual("a");
-                    expect(result.value[1]).toBe("bc");
+                    expect(source.slice(result.value[1])).toBe("bc");
                     break;
 
                 case Result.Variant.Err:
                     fail(result.error);
             }
 
-            result = parser.parse("bca");
+            source = "bca";
+            result = parser.parse(source);
 
             switch (result.variant) {
                 case Result.Variant.Ok:
                     expect(result.value[0]).toEqual("b");
-                    expect(result.value[1]).toBe("ca");
+                    expect(source.slice(result.value[1])).toBe("ca");
                     break;
 
                 case Result.Variant.Err:
                     fail(result.error);
             }
 
-            result = parser.parse("cab");
+            source = "cab";
+            result = parser.parse(source);
 
             switch (result.variant) {
                 case Result.Variant.Ok:
                     expect(result.value[0]).toEqual("c");
-                    expect(result.value[1]).toBe("ab");
+                    expect(source.slice(result.value[1])).toBe("ab");
                     break;
 
                 case Result.Variant.Err:
                     fail(result.error);
             }
 
-            result = parser.parse("f");
+            source = "f";
+            result = parser.parse(source);
 
             switch (result.variant) {
                 case Result.Variant.Err:
@@ -682,30 +701,32 @@ describe("Individual Parser functions", () => {
         });
 
         it("matches on the first parser to match", () => {
+            let source = "longer matches";
             let result = oneOf(
                 Parser.exact("longer"),
                 Parser.exact("long"),
-            ).parse("longer matches");
+            ).parse(source);
 
             switch (result.variant) {
                 case Result.Variant.Ok:
                     expect(result.value[0]).toEqual("longer");
-                    expect(result.value[1]).toBe(" matches");
+                    expect(source.slice(result.value[1])).toBe(" matches");
                     break;
 
                 case Result.Variant.Err:
                     fail(result.error);
             }
 
+            source = "shorter matches";
             result = oneOf(
                 Parser.exact("short"),
                 Parser.exact("shorter"),
-            ).parse("shorter matches");
+            ).parse(source);
 
             switch (result.variant) {
                 case Result.Variant.Ok:
                     expect(result.value[0]).toEqual("short");
-                    expect(result.value[1]).toBe("er matches");
+                    expect(source.slice(result.value[1])).toBe("er matches");
                     break;
 
                 case Result.Variant.Err:
@@ -718,14 +739,15 @@ describe("Individual Parser functions", () => {
         const { map } = Parser;
 
         it("does nothing if given identity function", () => {
+            const source = "anything";
             const result = map((x) => x, Parser.exact("anything")).parse(
-                "anything",
+                source,
             );
 
             switch (result.variant) {
                 case Result.Variant.Ok:
                     expect(result.value[0]).toEqual("anything");
-                    expect(result.value[1]).toBe("");
+                    expect(source.slice(result.value[1])).toBe("");
                     break;
 
                 case Result.Variant.Err:
@@ -734,10 +756,11 @@ describe("Individual Parser functions", () => {
         });
 
         it("can transform parsed values", () => {
+            const source = "anything";
             const result = map(
                 (match: string) => ({ key: "annotation", match: match }),
                 Parser.exact("anything"),
-            ).parse("anything");
+            ).parse(source);
 
             switch (result.variant) {
                 case Result.Variant.Ok:
@@ -745,7 +768,7 @@ describe("Individual Parser functions", () => {
                         key: "annotation",
                         match: "anything",
                     });
-                    expect(result.value[1]).toBe("");
+                    expect(source.slice(result.value[1])).toBe("");
                     break;
 
                 case Result.Variant.Err:
@@ -754,6 +777,7 @@ describe("Individual Parser functions", () => {
         });
 
         it("can remove unwanted pieces of parsed values", () => {
+            const source = "123-abc";
             const result = map(
                 ([dig, , alph]) => [dig, alph],
                 Parser.sequence(
@@ -761,12 +785,12 @@ describe("Individual Parser functions", () => {
                     Parser.exact("-"),
                     Parser.alpha(),
                 ),
-            ).parse("123-abc");
+            ).parse(source);
 
             switch (result.variant) {
                 case Result.Variant.Ok:
                     expect(result.value[0]).toEqual(["123", "abc"]);
-                    expect(result.value[1]).toBe("");
+                    expect(source.slice(result.value[1])).toBe("");
                     break;
 
                 case Result.Variant.Err:

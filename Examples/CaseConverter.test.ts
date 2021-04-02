@@ -21,9 +21,9 @@ describe("parses string casing", () => {
             const result = detectCasing.parse(input);
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    const [casing, rem] = result.value;
+                    const [casing, i] = result.value;
                     expect(casing).toBe(expected);
-                    expect(rem).toBe(remaining);
+                    expect(input.slice(i)).toBe(remaining);
                     break;
 
                 default:

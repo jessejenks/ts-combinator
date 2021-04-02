@@ -220,6 +220,9 @@ combinator. Instead, this is a pure [closure](https://whatthefuck.is/closure).
 
 ## [Unreleased]
 
+## Changed
+- Updates to index-based system
+
 ## [2.2.0] : 2021-04-02
 
 ### Added
