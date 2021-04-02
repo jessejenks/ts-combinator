@@ -19,7 +19,8 @@
         "test": "jest --watchAll",
         "build:js": "rollup --config",
         "build:types": "tsc --project ./ --emitDeclarationOnly",
-        "build": "npm run build:types && npm run build:js"
+        "build": "npm run build:types && npm run build:js",
+        "doc": "typedoc"
     },
     "keywords": [
         "parser",
@@ -39,6 +40,7 @@
         "jest": "26.6.3",
         "rollup": "2.43.0",
         "ts-jest": "26.5.2",
+        "typedoc": "^0.20.34",
         "typescript": "4.2.2"
     },
     "browserslist": [

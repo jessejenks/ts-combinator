@@ -1,0 +1,12 @@
+{
+    "out": "docs",
+    "name": "TS Combinator",
+    "entryPoints": "src/",
+    "exclude": [
+        "**/index.ts",
+        "**/*.test.ts"
+    ],
+    "tsconfig": "./tsconfig.json",
+    "excludePrivate": true,
+    "disableSources": true
+}
