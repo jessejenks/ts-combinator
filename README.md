@@ -220,9 +220,12 @@ combinator. Instead, this is a pure [closure](https://whatthefuck.is/closure).
 
 ## [Unreleased]
 
+### Changed
+- Renamed `maybe` to `optional`
+
 ## [1.0.0] : 2021-03-27
 
-## Added
+### Added
 - Number parsers
 - "maybe" parser
 

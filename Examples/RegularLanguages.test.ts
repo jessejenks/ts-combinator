@@ -1,7 +1,15 @@
 import { Result } from "../src/Result";
 import { Parser } from "../src/Parser";
 
-const { map, exact, sequence, oneOf, zeroOrMore, singleDigit, maybe } = Parser;
+const {
+    map,
+    exact,
+    sequence,
+    oneOf,
+    zeroOrMore,
+    singleDigit,
+    optional,
+} = Parser;
 
 describe("simple regular expression /a(b|c)d*/", () => {
     const parser = map(
@@ -176,19 +184,19 @@ describe("simple regular expression for phone numbers", () => {
             ...end,
         }),
         sequence(
-            maybe(exact("+"), ""),
-            maybe(exact("("), ""),
+            optional(exact("+"), ""),
+            optional(exact("("), ""),
             map(
                 (start): PhoneStart => ({ startBit: start.join("") }),
                 sequence(singleDigit(), singleDigit(), singleDigit()),
             ),
-            maybe(exact(")"), ""),
-            maybe(oneOf(exact("-"), exact("."), exact(" ")), ""),
+            optional(exact(")"), ""),
+            optional(oneOf(exact("-"), exact("."), exact(" ")), ""),
             map(
                 (middle): PhoneMiddle => ({ middleBit: middle.join("") }),
                 sequence(singleDigit(), singleDigit(), singleDigit()),
             ),
-            maybe(oneOf(exact("-"), exact("."), exact(" ")), ""),
+            optional(oneOf(exact("-"), exact("."), exact(" ")), ""),
             map(
                 (end): PhoneEnd => ({ endBit: end.join("") }),
                 sequence(
@@ -196,8 +204,8 @@ describe("simple regular expression for phone numbers", () => {
                     singleDigit(),
                     singleDigit(),
                     singleDigit(),
-                    maybe(singleDigit(), ""),
-                    maybe(singleDigit(), ""),
+                    optional(singleDigit(), ""),
+                    optional(singleDigit(), ""),
                 ),
             ),
         ),

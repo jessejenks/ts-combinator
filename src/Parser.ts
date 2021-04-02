@@ -154,8 +154,10 @@ export namespace Parser {
             ),
         );
 
-    export const maybe = <T>(parser: Parser<T>, defaultValue: T): Parser<T> =>
-        oneOf(parser, succeed(defaultValue));
+    export const optional = <T>(
+        parser: Parser<T>,
+        defaultValue: T,
+    ): Parser<T> => oneOf(parser, succeed(defaultValue));
 }
 
 export namespace Parser {

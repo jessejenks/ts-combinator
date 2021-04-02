@@ -774,11 +774,11 @@ describe("Individual Parser functions", () => {
         });
     });
 
-    describe("maybe", () => {
-        const { maybe } = Parser;
+    describe("optional", () => {
+        const { optional } = Parser;
 
         it("parses with or goes with a default value", () => {
-            const result = maybe(Parser.exact("abcde"), "default").parse(
+            const result = optional(Parser.exact("abcde"), "default").parse(
                 "abcdnope",
             );
             switch (result.variant) {
@@ -794,9 +794,9 @@ describe("Individual Parser functions", () => {
         describe("with 'sequence' and 'oneOf'", () => {
             const { sequence, oneOf, exact } = Parser;
             const parser = sequence(
-                maybe(exact("-"), "+"),
-                maybe(exact("("), "["),
-                maybe(oneOf(exact("a"), exact("c")), "d"),
+                optional(exact("-"), "+"),
+                optional(exact("("), "["),
+                optional(oneOf(exact("a"), exact("c")), "d"),
                 exact("blah"),
             );
 
@@ -818,7 +818,7 @@ describe("Individual Parser functions", () => {
             ];
 
             test.each(okCases)(
-                "Parses with 'maybe', 'sequence', and 'oneOf'",
+                "Parses with 'optional', 'sequence', and 'oneOf'",
                 (source, matches) => {
                     const result = parser.parse(source);
                     switch (result.variant) {
