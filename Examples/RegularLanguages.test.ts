@@ -43,8 +43,14 @@ describe("simple regular expression /a(b|c)d*/", () => {
     });
 
     const errCases: Array<[string, string]> = [
-        ["bd", 'Expected "a" but got "b" instead'],
-        ["ad", 'Expected "c" but got "d" instead'],
+        [
+            "bd",
+            'Error at (line: 1, column: 1)\nExpected "a" but got "b" instead\n\nbd\n^',
+        ],
+        [
+            "ad",
+            'Error at (line: 1, column: 2)\nExpected "c" but got "d" instead\n\nad\n ^',
+        ],
     ];
 
     test.each(errCases)("Does not match '%s'", (source, errMessage) => {
@@ -127,8 +133,8 @@ describe("date parser", () => {
         sequence(
             yearParser,
             oneOf(
-                sequence(exact("-"), monthParser, exact("-"), dayParser),
                 sequence(exact("/"), monthParser, exact("/"), dayParser),
+                sequence(exact("-"), monthParser, exact("-"), dayParser),
             ),
         ),
     );
@@ -151,14 +157,21 @@ describe("date parser", () => {
     });
 
     const errCases: Array<[string, string]> = [
-        ["2021-03/26", 'Expected "-" but got "/" instead'],
-        ["2021/03-26", 'Expected "/" but got "-" instead'],
+        [
+            "2021-03/26",
+            'Error at (line: 1, column: 8)\nExpected "-" but got "/" instead\n\n2021-03/26\n       ^',
+        ],
+        [
+            "2021/03-26",
+            'Error at (line: 1, column: 5)\nExpected "-" but got "/" instead\n\n2021/03-26\n    ^',
+        ],
     ];
 
-    test.each(errCases)("Does not parse date in '%s'", (source) => {
+    test.each(errCases)("Does not parse date in '%s'", (source, errMessage) => {
         const result = dateParser.parse(source);
         switch (result.variant) {
             case Result.Variant.Err:
+                expect(result.error).toBe(errMessage);
                 break;
 
             case Result.Variant.Ok:

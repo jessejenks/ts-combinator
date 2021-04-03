@@ -24,7 +24,7 @@ describe("Individual Parser functions", () => {
             [
                 "goodbye",
                 "hello world",
-                'Expected "goodbye" but got "hello w" instead',
+                'Error at (line: 1, column: 1)\nExpected "goodbye" but got "hello w" instead\n\nhello worl\n^',
             ],
         ];
 
@@ -187,13 +187,13 @@ describe("Individual Parser functions", () => {
             const errCases: Array<[string, string, string]> = [
                 [
                     "",
-                    'Expected a digit but got "" instead',
-                    'Expected digits but got "" instead',
+                    'Error at (line: 1, column: 1)\nExpected a digit but got "" instead\n\n\n^',
+                    'Error at (line: 1, column: 1)\nExpected digits but got "" instead\n\n\n^',
                 ],
                 [
                     "abcde",
-                    'Expected a digit but got "a" instead',
-                    'Expected digits but got "a" instead',
+                    'Error at (line: 1, column: 1)\nExpected a digit but got "a" instead\n\nabcde\n^',
+                    'Error at (line: 1, column: 1)\nExpected digits but got "a" instead\n\nabcde\n^',
                 ],
             ];
 
@@ -215,13 +215,13 @@ describe("Individual Parser functions", () => {
             const errCases: Array<[string, string, string]> = [
                 [
                     "",
-                    'Expected a character but got "" instead',
-                    'Expected characters but got "" instead',
+                    'Error at (line: 1, column: 1)\nExpected a character but got "" instead\n\n\n^',
+                    'Error at (line: 1, column: 1)\nExpected characters but got "" instead\n\n\n^',
                 ],
                 [
                     "12345",
-                    'Expected a character but got "1" instead',
-                    'Expected characters but got "1" instead',
+                    'Error at (line: 1, column: 1)\nExpected a character but got "1" instead\n\n12345\n^',
+                    'Error at (line: 1, column: 1)\nExpected characters but got "1" instead\n\n12345\n^',
                 ],
             ];
 
@@ -243,13 +243,13 @@ describe("Individual Parser functions", () => {
             const errCases: Array<[string, string, string]> = [
                 [
                     "",
-                    'Expected an upper case character but got "" instead',
-                    'Expected upper case characters but got "" instead',
+                    'Error at (line: 1, column: 1)\nExpected an upper case character but got "" instead\n\n\n^',
+                    'Error at (line: 1, column: 1)\nExpected upper case characters but got "" instead\n\n\n^',
                 ],
                 [
                     "12345",
-                    'Expected an upper case character but got "1" instead',
-                    'Expected upper case characters but got "1" instead',
+                    'Error at (line: 1, column: 1)\nExpected an upper case character but got "1" instead\n\n12345\n^',
+                    'Error at (line: 1, column: 1)\nExpected upper case characters but got "1" instead\n\n12345\n^',
                 ],
             ];
 
@@ -272,13 +272,13 @@ describe("Individual Parser functions", () => {
             const errCases: Array<[string, string, string]> = [
                 [
                     "",
-                    'Expected a lower case character but got "" instead',
-                    'Expected lower case characters but got "" instead',
+                    'Error at (line: 1, column: 1)\nExpected a lower case character but got "" instead\n\n\n^',
+                    'Error at (line: 1, column: 1)\nExpected lower case characters but got "" instead\n\n\n^',
                 ],
                 [
                     "12345",
-                    'Expected a lower case character but got "1" instead',
-                    'Expected lower case characters but got "1" instead',
+                    'Error at (line: 1, column: 1)\nExpected a lower case character but got "1" instead\n\n12345\n^',
+                    'Error at (line: 1, column: 1)\nExpected lower case characters but got "1" instead\n\n12345\n^',
                 ],
             ];
 
@@ -302,13 +302,13 @@ describe("Individual Parser functions", () => {
             const errCases: Array<[string, string, string]> = [
                 [
                     "",
-                    'Expected an alpha numeric character but got "" instead',
-                    'Expected alpha numeric characters but got "" instead',
+                    'Error at (line: 1, column: 1)\nExpected an alpha numeric character but got "" instead\n\n\n^',
+                    'Error at (line: 1, column: 1)\nExpected alpha numeric characters but got "" instead\n\n\n^',
                 ],
                 [
                     "$100",
-                    'Expected an alpha numeric character but got "$" instead',
-                    'Expected alpha numeric characters but got "$" instead',
+                    'Error at (line: 1, column: 1)\nExpected an alpha numeric character but got "$" instead\n\n$100\n^',
+                    'Error at (line: 1, column: 1)\nExpected alpha numeric characters but got "$" instead\n\n$100\n^',
                 ],
             ];
 
@@ -378,9 +378,18 @@ describe("Individual Parser functions", () => {
 
             // error messages could be improved
             const errCases: Array<[string, string]> = [
-                ["bob", 'Expected a number but got "b" instead'],
-                [".14159", 'Expected a number but got "." instead'],
-                ["+hello", 'Expected a number but got "+" instead'],
+                [
+                    "bob",
+                    'Error at (line: 1, column: 1)\nExpected a number but got "b" instead\n\nbob\n^',
+                ],
+                [
+                    ".14159",
+                    'Error at (line: 1, column: 1)\nExpected a number but got "." instead\n\n.14159\n^',
+                ],
+                [
+                    "+hello",
+                    'Error at (line: 1, column: 1)\nExpected a number but got "+" instead\n\n+hello\n^',
+                ],
             ];
 
             test.each(errCases)(
@@ -436,7 +445,7 @@ describe("Individual Parser functions", () => {
                 switch (result.variant) {
                     case Result.Variant.Err:
                         expect(result.error).toBe(
-                            'Expected an integer but got "123.1415" instead',
+                            'Error at (line: 1, column: 1)\nExpected an integer but got "123.1415" instead\n\n123.1415 h\n^',
                         );
                         break;
 
@@ -500,7 +509,7 @@ describe("Individual Parser functions", () => {
             switch (result.variant) {
                 case Result.Variant.Err:
                     expect(result.error).toBe(
-                        `Expected "d" but got "f" instead`,
+                        `Error at (line: 1, column: 4)\nExpected "d" but got "f" instead\n\nabcfg\n   ^`,
                     );
                     break;
 
@@ -573,7 +582,11 @@ describe("Individual Parser functions", () => {
         );
 
         const errCases: Array<[string, string, Parser<any>]> = [
-            ["bbbbb", 'Expected "a" but got "b" instead', Parser.exact("a")],
+            [
+                "bbbbb",
+                'Error at (line: 1, column: 1)\nExpected "a" but got "b" instead\n\nbbbbb\n^',
+                Parser.exact("a"),
+            ],
         ];
 
         test.each(errCases)(
@@ -630,7 +643,7 @@ describe("Individual Parser functions", () => {
             switch (result.variant) {
                 case Result.Variant.Err:
                     expect(result.error).toBe(
-                        'Expected "a" but got "b" instead',
+                        'Error at (line: 1, column: 1)\nExpected "a" but got "b" instead\n\nbcd\n^',
                     );
                     break;
 
@@ -691,7 +704,7 @@ describe("Individual Parser functions", () => {
             switch (result.variant) {
                 case Result.Variant.Err:
                     expect(result.error).toBe(
-                        'Expected "c" but got "f" instead',
+                        'Error at (line: 1, column: 1)\nExpected "c" but got "f" instead\n\nf\n^',
                     );
                     break;
 
@@ -855,9 +868,18 @@ describe("Individual Parser functions", () => {
             });
 
             const errCases: Array<[string, string]> = [
-                ["(-blah", 'Expected "blah" but got "-bla" instead'],
-                ["(-ablah", 'Expected "blah" but got "-abl" instead'],
-                ["(-cblah", 'Expected "blah" but got "-cbl" instead'],
+                [
+                    "(-blah",
+                    'Error at (line: 1, column: 2)\nExpected "blah" but got "-bla" instead\n\n(-blah\n ^',
+                ],
+                [
+                    "(-ablah",
+                    'Error at (line: 1, column: 2)\nExpected "blah" but got "-abl" instead\n\n(-ablah\n ^',
+                ],
+                [
+                    "(-cblah",
+                    'Error at (line: 1, column: 2)\nExpected "blah" but got "-cbl" instead\n\n(-cblah\n ^',
+                ],
             ];
 
             test.each(errCases)(
@@ -976,7 +998,10 @@ describe("Individual Parser functions", () => {
             });
 
             const errCases: Array<[string, string]> = [
-                ["abcd", 'Expected "d" but got "c" instead'],
+                [
+                    "abcd",
+                    'Error at (line: 1, column: 3)\nExpected "d" but got "c" instead\n\nabcd\n  ^',
+                ],
             ];
 
             test.each(errCases)("does not parse %s", (source, errMessage) => {

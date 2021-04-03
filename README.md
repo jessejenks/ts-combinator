@@ -138,8 +138,8 @@ const dateParser = map(
     sequence(
         yearParser,
         oneOf(
-            sequence(exact("-"), monthParser, exact("-"), dayParser),
             sequence(exact("/"), monthParser, exact("/"), dayParser),
+            sequence(exact("-"), monthParser, exact("-"), dayParser),
         ),
     ),
 );
@@ -162,18 +162,23 @@ const dateParser = map(
     sequence(
         yearParser,
         oneOf(
-            monthDayWithSeparator(exact("-"), monthParser, dayParser),
-            monthDayWithSeparator(exact("/"), monthParser, dayParser),
             monthDayWithSeparator(exact(":"), monthParser, dayParser),
+            monthDayWithSeparator(exact("/"), monthParser, dayParser),
+            monthDayWithSeparator(exact("-"), monthParser, dayParser),
         ),
     ),
 );
 ```
 
 Finally, the best part is that when a match fails, instead of just `null`, we
-actually get an error message like
-```
-'Expected "-" but got "/" instead'
+can get nicer error messages.
+```js
+dateParser.parse("2021/03-27");
+// Error at (line: 1, column: 8)
+// Expected "-" but got "/" instead
+// 
+// 2021-03/26
+//        ^
 ```
 
 # Terminology
@@ -222,6 +227,7 @@ combinator. Instead, this is a pure [closure](https://whatthefuck.is/closure).
 
 ## Changed
 - Updates to index-based system
+- Adds better error messages
 
 ## [2.2.0] : 2021-04-02
 

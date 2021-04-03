@@ -55,11 +55,12 @@ export namespace Parser {
             if (source.slice(index, index + toMatch.length) === toMatch) {
                 return Result.Ok([toMatch, index + toMatch.length, source]);
             }
+            const [location, context] = getErrorMessageContext(source, index);
             return Result.Err(
-                `Expected "${toMatch}" but got "${source.slice(
+                `${location}\nExpected "${toMatch}" but got "${source.slice(
                     index,
                     index + toMatch.length,
-                )}" instead`,
+                )}" instead\n\n${context}`,
             );
         });
 
@@ -191,8 +192,12 @@ export namespace Parser {
 
                 case Result.Variant.Ok:
                     if (!Number.isSafeInteger(result.value[0])) {
+                        const [location, context] = getErrorMessageContext(
+                            source,
+                            index,
+                        );
                         return Result.Err(
-                            `Expected an integer but got "${result.value[0]}" instead`,
+                            `${location}\nExpected an integer but got "${result.value[0]}" instead\n\n${context}`,
                         );
                     }
                     return result;
@@ -203,10 +208,14 @@ export namespace Parser {
         Parser<string>((source: string, index: number = 0) => {
             const match = new RegExp(`^${re.source}`).exec(source.slice(index));
             if (match === null) {
+                const [location, context] = getErrorMessageContext(
+                    source,
+                    index,
+                );
                 return Result.Err(
-                    `Expected ${expected} but got "${source.charAt(
+                    `${location}\nExpected ${expected} but got "${source.charAt(
                         index,
-                    )}" instead`,
+                    )}" instead\n\n${context}`,
                 );
             }
 
