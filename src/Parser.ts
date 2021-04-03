@@ -214,6 +214,53 @@ export namespace Parser {
             return Result.Ok([matched, index + matched.length, source]);
         });
 
+    function getErrorMessageContext(
+        source: string,
+        index: number,
+        maxPrevContext: number = 10,
+        maxPostContext: number = 10,
+    ): [string, string] {
+        const [line, column] = getCurrentLineAndColumn(source, index);
+        if (column > 1) {
+            maxPrevContext = Math.min(column - 1, maxPrevContext);
+        } else {
+            maxPrevContext = 0;
+        }
+        const indentation = [...Array(maxPrevContext)].fill(" ").join("");
+        return [
+            `Error at (line: ${line}, column: ${column})`,
+            `${truncateToNextNewLine(
+                source.slice(index - maxPrevContext, index + maxPostContext),
+            )}\n${indentation}^`,
+        ];
+    }
+
+    function truncateToNextNewLine(str: string): string {
+        for (let i = 1; i < str.length; i++) {
+            if (str.charAt(i) === "\n") {
+                return str.slice(0, i);
+            }
+        }
+        return str;
+    }
+
+    function getCurrentLineAndColumn(
+        source: string,
+        index: number,
+    ): [number, number] {
+        let line = 1;
+        let column = 1;
+        for (let i = 0; i < index; i++) {
+            if (source.charAt(i) === "\n") {
+                line++;
+                column = 1;
+            } else {
+                column++;
+            }
+        }
+        return [line, column];
+    }
+
     /**
      * Takes a parser and returns a parser which tries to match, using the given parser, zero or more times.
      *
