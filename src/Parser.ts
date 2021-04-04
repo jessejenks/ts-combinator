@@ -662,3 +662,65 @@ export namespace Parser {
         });
     }
 }
+
+export namespace Parser {
+    export type BinaryOperator = {
+        symbol: string;
+        bindingPower: [number, number];
+    };
+    export const toBinaryOperator = (
+        operatorSymbol: Parser<string>,
+        bindingPower: [number, number],
+    ): Parser<BinaryOperator> =>
+        map(
+            ([, symbol]) => ({
+                symbol,
+                bindingPower,
+            }),
+            sequence(spaces(), operatorSymbol, spaces()),
+        );
+
+    export const pratt = <T, U = T>(
+        left: Parser<T>,
+        infix: Parser<BinaryOperator>,
+        mapIntermediate: (symbol: string, left: U | T, right: U | T) => U,
+    ): Parser<U | T> =>
+        Parser<U | T>((source: string, index: number = 0) => {
+            const isEof = () => index === source.length;
+            function expr(minBindingPower: number = 0): ParseResult<U | T> {
+                let full: U | T;
+                const lhs = left.parse(source, index);
+                if (Result.isErr(lhs)) {
+                    return lhs;
+                }
+                full = lhs.value[0];
+                index = lhs.value[1];
+
+                while (true) {
+                    if (isEof()) {
+                        break;
+                    }
+
+                    const op = infix.parse(source, index);
+                    if (Result.isErr(op)) {
+                        return op;
+                    }
+                    const [{ symbol, bindingPower }, newIndex] = op.value;
+                    const [leftBindingPower, rightBindingPower] = bindingPower;
+                    if (leftBindingPower < minBindingPower) {
+                        break;
+                    }
+                    index = newIndex;
+
+                    const rhs = expr(rightBindingPower);
+                    if (Result.isErr(rhs)) {
+                        return rhs;
+                    }
+                    full = mapIntermediate(symbol, full, rhs.value[0]);
+                }
+                return Result.Ok([full, index, source]);
+            }
+
+            return expr();
+        });
+}
