@@ -12,6 +12,7 @@ const {
     oneOf,
     int,
     toBinaryOperator,
+    toUnaryOperator,
     pratt,
 } = Parser;
 
@@ -216,6 +217,51 @@ describe("Left Recursive Pratt", () => {
         const okCases: Array<[string, string]> = [
             ["1 - 2 - 3 - 4", "(- (- (- 1 2) 3) 4)"],
             ["1 / 2 / 3 / 4", "(/ (/ (/ 1 2) 3) 4)"],
+        ];
+
+        test.each(okCases)(
+            "parses '%s' as the string '%s'",
+            (source, expectedValue) => {
+                let result = exprParser.parse(source);
+                switch (result.variant) {
+                    case Result.Variant.Ok:
+                        expect(result.value[0]).toBe(expectedValue);
+                        break;
+
+                    case Result.Variant.Err:
+                        fail(result.error);
+                }
+            },
+        );
+    });
+});
+
+describe("Left Recursive Pratt With Prefix", () => {
+    const left = int();
+    const infix = oneOf(
+        toBinaryOperator(exact("-"), [1, 2]),
+        toBinaryOperator(exact("/"), [3, 4]),
+    );
+    const prefix = toUnaryOperator(exact("+"), 5);
+
+    describe("as S Expressions", () => {
+        const exprParser = pratt<number, string>(left, {
+            infix: {
+                op: infix,
+                map: (symbol, left, right) => `(${symbol} ${left} ${right})`,
+            },
+            prefix: {
+                op: prefix,
+                map: (symbol, right) => `(${symbol} ${right})`,
+            },
+        });
+
+        const okCases: Array<[string, string]> = [
+            ["1 - 2 - 3 - 4", "(- (- (- 1 2) 3) 4)"],
+            ["1 / 2 / 3 / 4", "(/ (/ (/ 1 2) 3) 4)"],
+            ["1 / 2 / +3", "(/ (/ 1 2) (+ 3))"],
+            ["1 / 2 / +3 / 4", "(/ (/ (/ 1 2) (+ 3)) 4)"],
+            ["1 / 2 / +3 / + 4", "(/ (/ (/ 1 2) (+ 3)) (+ 4))"],
         ];
 
         test.each(okCases)(
