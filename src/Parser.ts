@@ -664,6 +664,22 @@ export namespace Parser {
 }
 
 export namespace Parser {
+    export type UnaryOperator = {
+        symbol: string;
+        bindingPower: number;
+    };
+    export const toUnaryOperator = (
+        operatorSymbol: Parser<string>,
+        bindingPower: number,
+    ): Parser<UnaryOperator> =>
+        map(
+            ([, symbol]) => ({
+                symbol,
+                bindingPower,
+            }),
+            sequence(spaces(), operatorSymbol, spaces()),
+        );
+
     export type BinaryOperator = {
         symbol: string;
         bindingPower: [number, number];
@@ -685,6 +701,10 @@ export namespace Parser {
             op: Parser<BinaryOperator>;
             map: (symbol: string, left: U | T, right: U | T) => U;
         };
+        prefix?: {
+            op: Parser<UnaryOperator>;
+            map: (symbol: string, right: U | T) => U;
+        };
     };
 
     /**
@@ -693,18 +713,41 @@ export namespace Parser {
      */
     export const pratt = <T, U = T>(
         left: Parser<T>,
-        { infix }: OperatorOptions<T, U>,
+        { infix, prefix }: OperatorOptions<T, U>,
     ): Parser<U | T> =>
         Parser<U | T>((source: string, index: number = 0) => {
             const isEof = () => index === source.length;
             function expr(minBindingPower: number = 0): ParseResult<U | T> {
                 let full: U | T;
-                const lhs = left.parse(source, index);
-                if (Result.isErr(lhs)) {
-                    return lhs;
+                const prefixResult =
+                    prefix === undefined
+                        ? Result.Err("")
+                        : prefix.op.parse(source, index);
+
+                if (Result.isOk(prefixResult)) {
+                    const [
+                        { symbol, bindingPower },
+                        newIndex,
+                    ] = prefixResult.value;
+                    index = newIndex;
+
+                    const rhs = expr(bindingPower);
+                    if (Result.isErr(rhs)) {
+                        return rhs;
+                    }
+
+                    full =
+                        prefix === undefined
+                            ? rhs.value[0]
+                            : prefix.map(symbol, rhs.value[0]);
+                } else {
+                    const lhs = left.parse(source, index);
+                    if (Result.isErr(lhs)) {
+                        return lhs;
+                    }
+                    full = lhs.value[0];
+                    index = lhs.value[1];
                 }
-                full = lhs.value[0];
-                index = lhs.value[1];
 
                 while (true) {
                     if (isEof()) {
