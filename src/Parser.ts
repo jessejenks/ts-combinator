@@ -718,6 +718,8 @@ export namespace Parser {
     /**
      * A Pratt parser is a parser based on the paper [top-down operator precedence](https://tdop.github.io/) by
      * Vaughan Pratt.
+     * Many thanks to [this blog post](https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html) from
+     * [Aleksey Kladov](https://matklad.github.io)
      */
     export const pratt = <T, U = T>(
         left: Parser<T>,
