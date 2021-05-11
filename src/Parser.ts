@@ -709,6 +709,10 @@ export namespace Parser {
             op: Parser<UnaryOperator>;
             map: (symbol: string, left: U | T) => U;
         };
+        scope?: {
+            scopeBegin: Parser<string>;
+            scopeEnd: Parser<string>;
+        };
     };
 
     /**
@@ -717,7 +721,7 @@ export namespace Parser {
      */
     export const pratt = <T, U = T>(
         left: Parser<T>,
-        { infix, prefix, postfix }: OperatorOptions<T, U>,
+        { infix, prefix, postfix, scope }: OperatorOptions<T, U>,
     ): Parser<U | T> =>
         Parser<U | T>((source: string, index: number = 0) => {
             const isEof = () => index === source.length;
@@ -745,12 +749,37 @@ export namespace Parser {
                             ? rhs.value[0]
                             : prefix.map(symbol, rhs.value[0]);
                 } else {
-                    const lhs = left.parse(source, index);
-                    if (Result.isErr(lhs)) {
-                        return lhs;
+                    const scopeBeginResult =
+                        scope === undefined
+                            ? Result.Err("")
+                            : scope.scopeBegin.parse(source, index);
+
+                    if (Result.isOk(scopeBeginResult)) {
+                        index = scopeBeginResult.value[1];
+                        const lhs = expr(0);
+
+                        if (Result.isErr(lhs)) {
+                            return lhs;
+                        }
+
+                        const scopeEndResult =
+                            scope === undefined
+                                ? Result.Err("")
+                                : scope.scopeEnd.parse(source, index);
+
+                        if (Result.isErr(scopeEndResult)) {
+                            return scopeEndResult;
+                        }
+                        index = scopeEndResult.value[1];
+                        full = lhs.value[0];
+                    } else {
+                        const lhs = left.parse(source, index);
+                        if (Result.isErr(lhs)) {
+                            return lhs;
+                        }
+                        full = lhs.value[0];
+                        index = lhs.value[1];
                     }
-                    full = lhs.value[0];
-                    index = lhs.value[1];
                 }
 
                 while (true) {
@@ -778,6 +807,15 @@ export namespace Parser {
                                 ? full
                                 : postfix.map(symbol, full);
                         continue;
+                    }
+
+                    const scopeEndResult =
+                        scope === undefined
+                            ? Result.Err("")
+                            : scope.scopeEnd.parse(source, index);
+
+                    if (Result.isOk(scopeEndResult)) {
+                        break;
                     }
 
                     const op = infix.op.parse(source, index);
