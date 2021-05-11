@@ -664,14 +664,14 @@ export namespace Parser {
 }
 
 export namespace Parser {
-    export type UnaryOperator = {
-        symbol: string;
+    export type UnaryOperator<T = string> = {
+        symbol: T;
         bindingPower: number;
     };
-    export const toUnaryOperator = (
-        operatorSymbol: Parser<string>,
+    export const toUnaryOperator = <T = string>(
+        operatorSymbol: Parser<T>,
         bindingPower: number,
-    ): Parser<UnaryOperator> =>
+    ): Parser<UnaryOperator<T>> =>
         map(
             ([, symbol]) => ({
                 symbol,
@@ -680,14 +680,14 @@ export namespace Parser {
             sequence(spaces(), operatorSymbol, spaces()),
         );
 
-    export type BinaryOperator = {
-        symbol: string;
+    export type BinaryOperator<T = string> = {
+        symbol: T;
         bindingPower: [number, number];
     };
-    export const toBinaryOperator = (
-        operatorSymbol: Parser<string>,
+    export const toBinaryOperator = <T = string>(
+        operatorSymbol: Parser<T>,
         bindingPower: [number, number],
-    ): Parser<BinaryOperator> =>
+    ): Parser<BinaryOperator<T>> =>
         map(
             ([, symbol]) => ({
                 symbol,
@@ -696,18 +696,24 @@ export namespace Parser {
             sequence(spaces(), operatorSymbol, spaces()),
         );
 
-    export type OperatorOptions<T, U = T> = {
+    export type OperatorOptions<
+        T,
+        Acc = T,
+        Infix = string,
+        Prefix = string,
+        Postfix = string,
+    > = {
         infix: {
-            op: Parser<BinaryOperator>;
-            map: (symbol: string, left: U | T, right: U | T) => U;
+            op: Parser<BinaryOperator<Infix>>;
+            acc: (symbol: Infix, left: Acc | T, right: Acc | T) => Acc;
         };
         prefix?: {
-            op: Parser<UnaryOperator>;
-            map: (symbol: string, right: U | T) => U;
+            op: Parser<UnaryOperator<Prefix>>;
+            acc: (symbol: Prefix, right: Acc | T) => Acc;
         };
         postfix?: {
-            op: Parser<UnaryOperator>;
-            map: (symbol: string, left: U | T) => U;
+            op: Parser<UnaryOperator<Postfix>>;
+            acc: (symbol: Postfix, left: Acc | T) => Acc;
         };
         scope?: {
             scopeBegin: Parser<string>;
@@ -721,14 +727,25 @@ export namespace Parser {
      * Many thanks to [this blog post](https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html) from
      * [Aleksey Kladov](https://matklad.github.io)
      */
-    export const pratt = <T, U = T>(
+    export const pratt = <
+        T,
+        Acc = T,
+        Infix = string,
+        Prefix = string,
+        Postfix = string,
+    >(
         left: Parser<T>,
-        { infix, prefix, postfix, scope }: OperatorOptions<T, U>,
-    ): Parser<U | T> =>
-        Parser<U | T>((source: string, index: number = 0) => {
+        {
+            infix,
+            prefix,
+            postfix,
+            scope,
+        }: OperatorOptions<T, Acc, Infix, Prefix, Postfix>,
+    ): Parser<Acc | T> =>
+        Parser<Acc | T>((source: string, index: number = 0) => {
             const isEof = () => index === source.length;
-            function expr(minBindingPower: number = 0): ParseResult<U | T> {
-                let full: U | T;
+            function expr(minBindingPower: number = 0): ParseResult<Acc | T> {
+                let full: Acc | T;
                 const prefixResult =
                     prefix === undefined
                         ? Result.Err("")
@@ -749,7 +766,7 @@ export namespace Parser {
                     full =
                         prefix === undefined
                             ? rhs.value[0]
-                            : prefix.map(symbol, rhs.value[0]);
+                            : prefix.acc(symbol, rhs.value[0]);
                 } else {
                     const scopeBeginResult =
                         scope === undefined
@@ -807,7 +824,7 @@ export namespace Parser {
                         full =
                             postfix === undefined
                                 ? full
-                                : postfix.map(symbol, full);
+                                : postfix.acc(symbol, full);
                         continue;
                     }
 
@@ -835,7 +852,7 @@ export namespace Parser {
                     if (Result.isErr(rhs)) {
                         return rhs;
                     }
-                    full = infix.map(symbol, full, rhs.value[0]);
+                    full = infix.acc(symbol, full, rhs.value[0]);
                 }
                 return Result.Ok([full, index, source]);
             }
