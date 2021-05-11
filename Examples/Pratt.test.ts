@@ -87,3 +87,188 @@ describe("Pratt parser features", () => {
         );
     });
 });
+
+describe("Pratt parser type features", () => {
+    type MyInfix = "and" | "or";
+    type MyPrefix = "not";
+    const left = alphaNum();
+    const infix = oneOf(
+        toBinaryOperator(
+            map<string, MyInfix>(() => "or", exact("or")),
+            [1, 2],
+        ),
+        toBinaryOperator(
+            map<string, MyInfix>(() => "and", exact("and")),
+            [3, 4],
+        ),
+    );
+    const prefix = toUnaryOperator(
+        map<string, MyPrefix>(() => "not", exact("not")),
+        5,
+    );
+    const scopeBegin = exact("(");
+    const scopeEnd = exact(")");
+
+    type AstNode =
+        | string
+        | {
+              symbol: MyInfix;
+              left: AstNode;
+              right: AstNode;
+          }
+        | {
+              symbol: MyPrefix;
+              right: AstNode;
+          };
+
+    describe("As typed AST nodes", () => {
+        const exprParser = pratt<string, AstNode, MyInfix, MyPrefix>(left, {
+            infix: {
+                op: infix,
+                acc: (symbol, left, right) => ({
+                    symbol,
+                    left,
+                    right,
+                }),
+            },
+            prefix: {
+                op: prefix,
+                acc: (symbol, right) => ({ symbol, right }),
+            },
+            scope: {
+                scopeBegin,
+                scopeEnd,
+            },
+        });
+
+        const okCases: Array<[string, AstNode]> = [
+            ["nice and cool", { symbol: "and", left: "nice", right: "cool" }],
+            [
+                "nice and cool and wow",
+                {
+                    symbol: "and",
+                    left: {
+                        symbol: "and",
+                        left: "nice",
+                        right: "cool",
+                    },
+                    right: "wow",
+                },
+            ],
+            [
+                "nice or cool and wow",
+                {
+                    symbol: "or",
+                    left: "nice",
+                    right: {
+                        symbol: "and",
+                        left: "cool",
+                        right: "wow",
+                    },
+                },
+            ],
+            [
+                "not cool",
+                {
+                    symbol: "not",
+                    right: "cool",
+                },
+            ],
+            [
+                "not not not cool",
+                {
+                    symbol: "not",
+                    right: {
+                        symbol: "not",
+                        right: {
+                            symbol: "not",
+                            right: "cool",
+                        },
+                    },
+                },
+            ],
+            [
+                "not nice and cool",
+                {
+                    symbol: "and",
+                    left: { symbol: "not", right: "nice" },
+                    right: "cool",
+                },
+            ],
+            [
+                "not (nice) and cool",
+                {
+                    symbol: "and",
+                    left: { symbol: "not", right: "nice" },
+                    right: "cool",
+                },
+            ],
+            [
+                "not nice and (cool)",
+                {
+                    symbol: "and",
+                    left: { symbol: "not", right: "nice" },
+                    right: "cool",
+                },
+            ],
+            [
+                "(not nice) and cool",
+                {
+                    symbol: "and",
+                    left: { symbol: "not", right: "nice" },
+                    right: "cool",
+                },
+            ],
+            [
+                "not (nice and cool)",
+                {
+                    symbol: "not",
+
+                    right: {
+                        symbol: "and",
+
+                        left: "nice",
+                        right: "cool",
+                    },
+                },
+            ],
+        ];
+
+        test.each(okCases)("parses '%s'", (source, expectedValue) => {
+            let result = exprParser.parse(source);
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value[0]).toEqual(expectedValue);
+                    break;
+
+                case Result.Variant.Err:
+                    fail(result.error);
+            }
+        });
+
+        const errCases: Array<[string, string]> = [
+            [
+                "(not) nice and cool",
+                'Expected alpha numeric characters but got ")" instead',
+            ],
+            [
+                "not (nice and) cool",
+                'Expected alpha numeric characters but got ")" instead',
+            ],
+            ["not nice (and) cool", 'Expected "and" but got'],
+            ["not nice (and cool)", 'Expected "and" but got'],
+        ];
+
+        test.each(errCases)("does not parse '%s'", (source, expectedValue) => {
+            let result = exprParser.parse(source);
+            switch (result.variant) {
+                case Result.Variant.Err:
+                    expect(result.error).toMatch(expectedValue);
+                    break;
+
+                case Result.Variant.Ok:
+                    fail("Should not have parsed");
+            }
+        });
+    });
+});
