@@ -236,13 +236,14 @@ describe("Left Recursive Pratt", () => {
     });
 });
 
-describe("Left Recursive Pratt With Prefix", () => {
+describe("Left Recursive Pratt With Pre and Postfix", () => {
     const left = int();
     const infix = oneOf(
         toBinaryOperator(exact("-"), [1, 2]),
         toBinaryOperator(exact("/"), [3, 4]),
     );
     const prefix = toUnaryOperator(exact("+"), 5);
+    const postfix = toUnaryOperator(exact("!"), 7);
 
     describe("as S Expressions", () => {
         const exprParser = pratt<number, string>(left, {
@@ -254,14 +255,28 @@ describe("Left Recursive Pratt With Prefix", () => {
                 op: prefix,
                 map: (symbol, right) => `(${symbol} ${right})`,
             },
+            postfix: {
+                op: postfix,
+                map: (symbol, left) => `(${symbol} ${left})`,
+            },
         });
 
         const okCases: Array<[string, string]> = [
             ["1 - 2 - 3 - 4", "(- (- (- 1 2) 3) 4)"],
             ["1 / 2 / 3 / 4", "(/ (/ (/ 1 2) 3) 4)"],
+            ["+3", "(+ 3)"],
+            ["3!", "(! 3)"],
+            ["++3", "(+ (+ 3))"],
+            ["3!!", "(! (! 3))"],
+            ["3!!!!", "(! (! (! (! 3))))"],
+            ["++++3", "(+ (+ (+ (+ 3))))"],
+            ["+3!", "(+ (! 3))"], // "!" has higher binding power / precedence than "+"
+            ["++3!!", "(+ (+ (! (! 3))))"],
             ["1 / 2 / +3", "(/ (/ 1 2) (+ 3))"],
             ["1 / 2 / +3 / 4", "(/ (/ (/ 1 2) (+ 3)) 4)"],
             ["1 / 2 / +3 / + 4", "(/ (/ (/ 1 2) (+ 3)) (+ 4))"],
+            ["1 / 2 / 3! / + 4", "(/ (/ (/ 1 2) (! 3)) (+ 4))"],
+            ["1 / 2 / +3! / + 4", "(/ (/ (/ 1 2) (+ (! 3))) (+ 4))"],
         ];
 
         test.each(okCases)(
