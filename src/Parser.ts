@@ -705,6 +705,10 @@ export namespace Parser {
             op: Parser<UnaryOperator>;
             map: (symbol: string, right: U | T) => U;
         };
+        postfix?: {
+            op: Parser<UnaryOperator>;
+            map: (symbol: string, left: U | T) => U;
+        };
     };
 
     /**
@@ -713,7 +717,7 @@ export namespace Parser {
      */
     export const pratt = <T, U = T>(
         left: Parser<T>,
-        { infix, prefix }: OperatorOptions<T, U>,
+        { infix, prefix, postfix }: OperatorOptions<T, U>,
     ): Parser<U | T> =>
         Parser<U | T>((source: string, index: number = 0) => {
             const isEof = () => index === source.length;
@@ -726,12 +730,12 @@ export namespace Parser {
 
                 if (Result.isOk(prefixResult)) {
                     const [
-                        { symbol, bindingPower },
+                        { symbol, bindingPower: rightBindingPower },
                         newIndex,
                     ] = prefixResult.value;
                     index = newIndex;
 
-                    const rhs = expr(bindingPower);
+                    const rhs = expr(rightBindingPower);
                     if (Result.isErr(rhs)) {
                         return rhs;
                     }
@@ -752,6 +756,28 @@ export namespace Parser {
                 while (true) {
                     if (isEof()) {
                         break;
+                    }
+
+                    const postfixResult =
+                        postfix === undefined
+                            ? Result.Err("")
+                            : postfix.op.parse(source, index);
+
+                    if (Result.isOk(postfixResult)) {
+                        const [
+                            { symbol, bindingPower: leftBindingPower },
+                            newIndex,
+                        ] = postfixResult.value;
+                        if (leftBindingPower < minBindingPower) {
+                            break;
+                        }
+                        index = newIndex;
+
+                        full =
+                            postfix === undefined
+                                ? full
+                                : postfix.map(symbol, full);
+                        continue;
                     }
 
                     const op = infix.op.parse(source, index);
