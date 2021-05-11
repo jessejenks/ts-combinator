@@ -244,6 +244,8 @@ describe("Left Recursive Pratt With Pre and Postfix", () => {
     );
     const prefix = toUnaryOperator(exact("+"), 5);
     const postfix = toUnaryOperator(exact("!"), 7);
+    const scopeBegin = exact("{");
+    const scopeEnd = exact("}");
 
     describe("as S Expressions", () => {
         const exprParser = pratt<number, string>(left, {
@@ -259,9 +261,13 @@ describe("Left Recursive Pratt With Pre and Postfix", () => {
                 op: postfix,
                 map: (symbol, left) => `(${symbol} ${left})`,
             },
+            scope: {
+                scopeBegin,
+                scopeEnd,
+            },
         });
 
-        const okCases: Array<[string, string]> = [
+        const okCases: Array<[string, string | number]> = [
             ["1 - 2 - 3 - 4", "(- (- (- 1 2) 3) 4)"],
             ["1 / 2 / 3 / 4", "(/ (/ (/ 1 2) 3) 4)"],
             ["+3", "(+ 3)"],
@@ -277,6 +283,16 @@ describe("Left Recursive Pratt With Pre and Postfix", () => {
             ["1 / 2 / +3 / + 4", "(/ (/ (/ 1 2) (+ 3)) (+ 4))"],
             ["1 / 2 / 3! / + 4", "(/ (/ (/ 1 2) (! 3)) (+ 4))"],
             ["1 / 2 / +3! / + 4", "(/ (/ (/ 1 2) (+ (! 3))) (+ 4))"],
+            ["1", 1],
+            ["{1}", 1],
+            ["{+1}", "(+ 1)"],
+            ["{1!}", "(! 1)"],
+            ["{+1}!", "(! (+ 1))"],
+            ["+{+3}!!", "(+ (! (! (+ 3))))"],
+            ["{1 / 2}", "(/ 1 2)"],
+            ["1 / {2 / 3}", "(/ 1 (/ 2 3))"],
+            ["1 / {2 / 3} / 4", "(/ (/ 1 (/ 2 3)) 4)"],
+            ["1 / {2 / 3 / 4}", "(/ 1 (/ (/ 2 3) 4))"],
         ];
 
         test.each(okCases)(
