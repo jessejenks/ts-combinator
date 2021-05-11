@@ -3,6 +3,8 @@ import { Parser } from "../src/Parser";
 
 const {
     integerPart,
+    alphaNum,
+    map,
     oneOf,
     exact,
     pratt,
@@ -25,15 +27,15 @@ describe("Pratt parser features", () => {
         const exprParser = pratt<string>(left, {
             infix: {
                 op: infix,
-                map: (symbol, left, right) => `(${symbol} ${left} ${right})`,
+                acc: (symbol, left, right) => `(${symbol} ${left} ${right})`,
             },
             prefix: {
                 op: prefix,
-                map: (symbol, right) => `(${symbol} ${right})`,
+                acc: (symbol, right) => `(${symbol} ${right})`,
             },
             postfix: {
                 op: postfix,
-                map: (symbol, left) => `(${symbol} ${left})`,
+                acc: (symbol, left) => `(${symbol} ${left})`,
             },
             scope: {
                 scopeBegin,
