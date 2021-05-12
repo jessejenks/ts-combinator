@@ -109,9 +109,13 @@ describe("Right Recursive Pratt", () => {
     );
 
     describe("compute results", () => {
-        const exprParser = pratt(left, infix, (symbol, left, right) =>
-            symbol === "-" ? left - right : left / right,
-        );
+        const exprParser = pratt(left, {
+            infix: {
+                op: infix,
+                map: (symbol, left, right) =>
+                    symbol === "-" ? left - right : left / right,
+            },
+        });
 
         const okCases: Array<[string, number]> = [
             ["1 - 2 - 3 - 4", 1 - (2 - (3 - 4))],
@@ -135,11 +139,12 @@ describe("Right Recursive Pratt", () => {
     });
 
     describe("as S Expressions", () => {
-        const exprParser = pratt<number, string>(
-            left,
-            infix,
-            (symbol, left, right) => `(${symbol} ${left} ${right})`,
-        );
+        const exprParser = pratt<number, string>(left, {
+            infix: {
+                op: infix,
+                map: (symbol, left, right) => `(${symbol} ${left} ${right})`,
+            },
+        });
 
         const okCases: Array<[string, string]> = [
             ["1 - 2 - 3 - 4", "(- 1 (- 2 (- 3 4)))"],
@@ -171,9 +176,13 @@ describe("Left Recursive Pratt", () => {
     );
 
     describe("compute results", () => {
-        const exprParser = pratt(left, infix, (symbol, left, right) =>
-            symbol === "-" ? left - right : left / right,
-        );
+        const exprParser = pratt(left, {
+            infix: {
+                op: infix,
+                map: (symbol, left, right) =>
+                    symbol === "-" ? left - right : left / right,
+            },
+        });
 
         const okCases: Array<[string, number]> = [
             ["1 - 2 - 3 - 4", 1 - 2 - 3 - 4],
@@ -197,11 +206,12 @@ describe("Left Recursive Pratt", () => {
     });
 
     describe("as S Expressions", () => {
-        const exprParser = pratt<number, string>(
-            left,
-            infix,
-            (symbol, left, right) => `(${symbol} ${left} ${right})`,
-        );
+        const exprParser = pratt<number, string>(left, {
+            infix: {
+                op: infix,
+                map: (symbol, left, right) => `(${symbol} ${left} ${right})`,
+            },
+        });
 
         const okCases: Array<[string, string]> = [
             ["1 - 2 - 3 - 4", "(- (- (- 1 2) 3) 4)"],
