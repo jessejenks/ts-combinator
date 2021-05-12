@@ -680,10 +680,20 @@ export namespace Parser {
             sequence(spaces(), operatorSymbol, spaces()),
         );
 
+    export type OperatorOptions<T, U = T> = {
+        infix: {
+            op: Parser<BinaryOperator>;
+            map: (symbol: string, left: U | T, right: U | T) => U;
+        };
+    };
+
+    /**
+     * A Pratt parser is a parser based on the paper [top-down operator precedence](https://tdop.github.io/) by
+     * Vaughan Pratt.
+     */
     export const pratt = <T, U = T>(
         left: Parser<T>,
-        infix: Parser<BinaryOperator>,
-        mapIntermediate: (symbol: string, left: U | T, right: U | T) => U,
+        { infix }: OperatorOptions<T, U>,
     ): Parser<U | T> =>
         Parser<U | T>((source: string, index: number = 0) => {
             const isEof = () => index === source.length;
@@ -701,7 +711,7 @@ export namespace Parser {
                         break;
                     }
 
-                    const op = infix.parse(source, index);
+                    const op = infix.op.parse(source, index);
                     if (Result.isErr(op)) {
                         return op;
                     }
@@ -716,7 +726,7 @@ export namespace Parser {
                     if (Result.isErr(rhs)) {
                         return rhs;
                     }
-                    full = mapIntermediate(symbol, full, rhs.value[0]);
+                    full = infix.map(symbol, full, rhs.value[0]);
                 }
                 return Result.Ok([full, index, source]);
             }
