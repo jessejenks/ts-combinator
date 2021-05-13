@@ -26,7 +26,7 @@ export const convertCasing = (input: string, to: Casing, from?: Casing) => {
         if (Result.isErr(result)) {
             return Result.Err("Could not detect input casing");
         }
-        from = result.value[0];
+        from = result.value.parsed;
     }
     switch (from) {
         case Casing.Pascal:
@@ -73,7 +73,7 @@ const convertCasingFromPascal = (input: string, to: Casing) => {
         return Result.Err(`input: "${input}" was not PascalCased`);
     }
 
-    const pieces = result.value[0];
+    const pieces = result.value.parsed;
     switch (to) {
         case Casing.Pascal:
             return Result.Ok(pieces.map(([up, rest]) => up + rest).join(""));
@@ -104,7 +104,9 @@ const convertCasingFromCamel = (input: string, to: Casing) => {
         return Result.Err(`input: "${input}" was not camelCased`);
     }
 
-    const [[leading, rest]] = result.value;
+    const {
+        parsed: [leading, rest],
+    } = result.value;
     switch (to) {
         case Casing.Pascal:
             return Result.Ok(
@@ -135,7 +137,9 @@ const convertCasingFromSnake = (input: string, to: Casing) => {
         return Result.Err(`input: "${input}" was not snake_cased`);
     }
 
-    const [[leading, rest]] = result.value;
+    const {
+        parsed: [leading, rest],
+    } = result.value;
     switch (to) {
         case Casing.Pascal:
             return Result.Ok(

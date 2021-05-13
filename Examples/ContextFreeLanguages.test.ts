@@ -2,17 +2,8 @@ import { Maybe } from "../src/Maybe";
 import { Result } from "../src/Result";
 import { Parser } from "../src/Parser";
 
-const {
-    sequence,
-    map,
-    oneOf,
-    exact,
-    spaces,
-    int,
-    maybe,
-    optional,
-    lazy,
-} = Parser;
+const { sequence, map, oneOf, exact, spaces, int, maybe, optional, lazy } =
+    Parser;
 
 describe("parses canonical context free grammar of balanced parentheses", () => {
     /**
@@ -56,7 +47,7 @@ describe("parses canonical context free grammar of balanced parentheses", () => 
 
         switch (result.variant) {
             case Result.Variant.Ok:
-                expect(result.value[0]).toEqual(matches);
+                expect(result.value.parsed).toEqual(matches);
                 break;
 
             case Result.Variant.Err:
@@ -159,7 +150,7 @@ describe("parses and interprets right-recursive arithmetic language", () => {
 
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toBe(expected);
+                    expect(result.value.parsed).toBe(expected);
                     break;
 
                 case Result.Variant.Err:
@@ -321,7 +312,7 @@ describe("parses right-recursive arithmetic language to typed AST", () => {
 
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toEqual(expected);
+                    expect(result.value.parsed).toEqual(expected);
                     break;
 
                 case Result.Variant.Err:

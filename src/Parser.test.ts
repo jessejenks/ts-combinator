@@ -12,7 +12,7 @@ describe("Individual Parser functions", () => {
             const result = exact(toMatch).parse(source);
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toBe(toMatch);
+                    expect(result.value.parsed).toBe(toMatch);
                     break;
 
                 case Result.Variant.Err:
@@ -34,7 +34,7 @@ describe("Individual Parser functions", () => {
                 const result = exact(toMatch).parse(source);
                 switch (result.variant) {
                     case Result.Variant.Err:
-                        expect(result.error).toBe(errMessage);
+                        expect(result.error.message).toBe(errMessage);
                         break;
 
                     case Result.Variant.Ok:
@@ -56,8 +56,8 @@ describe("Individual Parser functions", () => {
             const result = succeed(value).parse(source);
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toBe(value);
-                    expect(source.slice(result.value[1])).toBe(source);
+                    expect(result.value.parsed).toBe(value);
+                    expect(source.slice(result.value.index)).toBe(source);
                     break;
 
                 case Result.Variant.Err:
@@ -77,7 +77,7 @@ describe("Individual Parser functions", () => {
             const result = fail(errMessage).parse(source);
             switch (result.variant) {
                 case Result.Variant.Err:
-                    expect(result.error).toMatch(errMessage);
+                    expect(result.error.message).toMatch(errMessage);
                     break;
 
                 case Result.Variant.Ok:
@@ -102,7 +102,9 @@ describe("Individual Parser functions", () => {
                 const result = spaces().parse(source);
                 switch (result.variant) {
                     case Result.Variant.Ok:
-                        expect(source.slice(result.value[1])).toBe(remaining);
+                        expect(source.slice(result.value.index)).toBe(
+                            remaining,
+                        );
                         break;
 
                     case Result.Variant.Err:
@@ -148,7 +150,7 @@ describe("Individual Parser functions", () => {
                     let result = singleParser.parse(source);
                     switch (result.variant) {
                         case Result.Variant.Ok:
-                            expect(source.slice(result.value[1])).toBe(
+                            expect(source.slice(result.value.index)).toBe(
                                 singleCase,
                             );
                             break;
@@ -160,7 +162,7 @@ describe("Individual Parser functions", () => {
                     result = multipleParser.parse(source);
                     switch (result.variant) {
                         case Result.Variant.Ok:
-                            expect(source.slice(result.value[1])).toBe(
+                            expect(source.slice(result.value.index)).toBe(
                                 multipleCase,
                             );
                             break;
@@ -177,7 +179,7 @@ describe("Individual Parser functions", () => {
                     let result = singleParser.parse(source);
                     switch (result.variant) {
                         case Result.Variant.Err:
-                            expect(result.error).toBe(singleCase);
+                            expect(result.error.message).toBe(singleCase);
                             break;
 
                         case Result.Variant.Ok:
@@ -187,7 +189,7 @@ describe("Individual Parser functions", () => {
                     result = multipleParser.parse(source);
                     switch (result.variant) {
                         case Result.Variant.Err:
-                            expect(result.error).toBe(multipleCase);
+                            expect(result.error.message).toBe(multipleCase);
                             break;
 
                         case Result.Variant.Ok:
@@ -365,8 +367,8 @@ describe("Individual Parser functions", () => {
 
                     switch (result.variant) {
                         case Result.Variant.Ok:
-                            expect(result.value[0]).toBe(match);
-                            expect(source.slice(result.value[1])).toBe(
+                            expect(result.value.parsed).toBe(match);
+                            expect(source.slice(result.value.index)).toBe(
                                 remaining,
                             );
                             break;
@@ -384,8 +386,8 @@ describe("Individual Parser functions", () => {
 
                     switch (result.variant) {
                         case Result.Variant.Ok:
-                            expect(result.value[0]).toBe(Number(match));
-                            expect(source.slice(result.value[1])).toBe(
+                            expect(result.value.parsed).toBe(Number(match));
+                            expect(source.slice(result.value.index)).toBe(
                                 remaining,
                             );
                             break;
@@ -419,7 +421,7 @@ describe("Individual Parser functions", () => {
 
                     switch (result.variant) {
                         case Result.Variant.Err:
-                            expect(result.error).toBe(errMessage);
+                            expect(result.error.message).toBe(errMessage);
                             break;
 
                         case Result.Variant.Ok:
@@ -435,7 +437,7 @@ describe("Individual Parser functions", () => {
 
                     switch (result.variant) {
                         case Result.Variant.Err:
-                            expect(result.error).toBe(errMessage);
+                            expect(result.error.message).toBe(errMessage);
                             break;
 
                         case Result.Variant.Ok:
@@ -453,8 +455,8 @@ describe("Individual Parser functions", () => {
                 let result = int().parse(source);
                 switch (result.variant) {
                     case Result.Variant.Ok:
-                        expect(result.value[0]).toBe(12345);
-                        expect(source.slice(result.value[1])).toBe(" hello");
+                        expect(result.value.parsed).toBe(12345);
+                        expect(source.slice(result.value.index)).toBe(" hello");
                         break;
 
                     case Result.Variant.Err:
@@ -464,7 +466,7 @@ describe("Individual Parser functions", () => {
                 result = int().parse("123.1415 hello");
                 switch (result.variant) {
                     case Result.Variant.Err:
-                        expect(result.error).toBe(
+                        expect(result.error.message).toBe(
                             'Error at (line: 1, column: 1)\nExpected an integer but got "123.1415" instead\n\n123.1415 h\n^',
                         );
                         break;
@@ -483,8 +485,8 @@ describe("Individual Parser functions", () => {
                 const result = integerPart().parse(source);
                 switch (result.variant) {
                     case Result.Variant.Ok:
-                        expect(result.value[0]).toBe("123");
-                        expect(source.slice(result.value[1])).toBe(
+                        expect(result.value.parsed).toBe("123");
+                        expect(source.slice(result.value.index)).toBe(
                             ".1415 hello",
                         );
                         break;
@@ -508,8 +510,8 @@ describe("Individual Parser functions", () => {
 
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toEqual(["yes,", " "]);
-                    expect(source.slice(result.value[1])).toBe("and");
+                    expect(result.value.parsed).toEqual(["yes,", " "]);
+                    expect(source.slice(result.value.index)).toBe("and");
                     break;
 
                 case Result.Variant.Err:
@@ -528,7 +530,7 @@ describe("Individual Parser functions", () => {
 
             switch (result.variant) {
                 case Result.Variant.Err:
-                    expect(result.error).toBe(
+                    expect(result.error.message).toBe(
                         `Error at (line: 1, column: 4)\nExpected "d" but got "f" instead\n\nabcfg\n   ^`,
                     );
                     break;
@@ -560,8 +562,10 @@ describe("Individual Parser functions", () => {
 
                 switch (result.variant) {
                     case Result.Variant.Ok:
-                        expect(result.value[0]).toEqual(matches);
-                        expect(source.slice(result.value[1])).toBe(remaining);
+                        expect(result.value.parsed).toEqual(matches);
+                        expect(source.slice(result.value.index)).toBe(
+                            remaining,
+                        );
                         break;
 
                     case Result.Variant.Err:
@@ -591,8 +595,10 @@ describe("Individual Parser functions", () => {
 
                 switch (result.variant) {
                     case Result.Variant.Ok:
-                        expect(result.value[0]).toEqual(matches);
-                        expect(source.slice(result.value[1])).toBe(remaining);
+                        expect(result.value.parsed).toEqual(matches);
+                        expect(source.slice(result.value.index)).toBe(
+                            remaining,
+                        );
                         break;
 
                     case Result.Variant.Err:
@@ -616,7 +622,7 @@ describe("Individual Parser functions", () => {
 
                 switch (result.variant) {
                     case Result.Variant.Err:
-                        expect(result.error).toBe(errMessage);
+                        expect(result.error.message).toBe(errMessage);
                         break;
 
                     case Result.Variant.Ok:
@@ -634,7 +640,7 @@ describe("Individual Parser functions", () => {
 
             switch (result.variant) {
                 case Result.Variant.Err:
-                    expect(result.error).toBe("No parsers provided");
+                    expect(result.error.message).toBe("No parsers provided");
                     break;
 
                 case Result.Variant.Ok:
@@ -649,8 +655,8 @@ describe("Individual Parser functions", () => {
 
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toEqual("a");
-                    expect(source.slice(result.value[1])).toBe("bc");
+                    expect(result.value.parsed).toEqual("a");
+                    expect(source.slice(result.value.index)).toBe("bc");
                     break;
 
                 case Result.Variant.Err:
@@ -662,7 +668,7 @@ describe("Individual Parser functions", () => {
 
             switch (result.variant) {
                 case Result.Variant.Err:
-                    expect(result.error).toBe(
+                    expect(result.error.message).toBe(
                         'Error at (line: 1, column: 1)\nExpected "a" but got "b" instead\n\nbcd\n^',
                     );
                     break;
@@ -684,8 +690,8 @@ describe("Individual Parser functions", () => {
 
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toEqual("a");
-                    expect(source.slice(result.value[1])).toBe("bc");
+                    expect(result.value.parsed).toEqual("a");
+                    expect(source.slice(result.value.index)).toBe("bc");
                     break;
 
                 case Result.Variant.Err:
@@ -697,8 +703,8 @@ describe("Individual Parser functions", () => {
 
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toEqual("b");
-                    expect(source.slice(result.value[1])).toBe("ca");
+                    expect(result.value.parsed).toEqual("b");
+                    expect(source.slice(result.value.index)).toBe("ca");
                     break;
 
                 case Result.Variant.Err:
@@ -710,8 +716,8 @@ describe("Individual Parser functions", () => {
 
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toEqual("c");
-                    expect(source.slice(result.value[1])).toBe("ab");
+                    expect(result.value.parsed).toEqual("c");
+                    expect(source.slice(result.value.index)).toBe("ab");
                     break;
 
                 case Result.Variant.Err:
@@ -723,7 +729,7 @@ describe("Individual Parser functions", () => {
 
             switch (result.variant) {
                 case Result.Variant.Err:
-                    expect(result.error).toBe(
+                    expect(result.error.message).toBe(
                         'Error at (line: 1, column: 1)\nExpected "c" but got "f" instead\n\nf\n^',
                     );
                     break;
@@ -742,8 +748,8 @@ describe("Individual Parser functions", () => {
 
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toEqual("longer");
-                    expect(source.slice(result.value[1])).toBe(" matches");
+                    expect(result.value.parsed).toEqual("longer");
+                    expect(source.slice(result.value.index)).toBe(" matches");
                     break;
 
                 case Result.Variant.Err:
@@ -758,8 +764,8 @@ describe("Individual Parser functions", () => {
 
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toEqual("short");
-                    expect(source.slice(result.value[1])).toBe("er matches");
+                    expect(result.value.parsed).toEqual("short");
+                    expect(source.slice(result.value.index)).toBe("er matches");
                     break;
 
                 case Result.Variant.Err:
@@ -779,8 +785,8 @@ describe("Individual Parser functions", () => {
 
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toEqual("anything");
-                    expect(source.slice(result.value[1])).toBe("");
+                    expect(result.value.parsed).toEqual("anything");
+                    expect(source.slice(result.value.index)).toBe("");
                     break;
 
                 case Result.Variant.Err:
@@ -797,11 +803,11 @@ describe("Individual Parser functions", () => {
 
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toEqual({
+                    expect(result.value.parsed).toEqual({
                         key: "annotation",
                         match: "anything",
                     });
-                    expect(source.slice(result.value[1])).toBe("");
+                    expect(source.slice(result.value.index)).toBe("");
                     break;
 
                 case Result.Variant.Err:
@@ -822,8 +828,8 @@ describe("Individual Parser functions", () => {
 
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toEqual(["123", "abc"]);
-                    expect(source.slice(result.value[1])).toBe("");
+                    expect(result.value.parsed).toEqual(["123", "abc"]);
+                    expect(source.slice(result.value.index)).toBe("");
                     break;
 
                 case Result.Variant.Err:
@@ -841,7 +847,7 @@ describe("Individual Parser functions", () => {
             );
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toEqual("default");
+                    expect(result.value.parsed).toEqual("default");
                     break;
 
                 case Result.Variant.Err:
@@ -879,7 +885,7 @@ describe("Individual Parser functions", () => {
                 const result = parser.parse(source);
                 switch (result.variant) {
                     case Result.Variant.Ok:
-                        expect(result.value[0]).toEqual(matches);
+                        expect(result.value.parsed).toEqual(matches);
                         break;
 
                     case Result.Variant.Err:
@@ -908,7 +914,7 @@ describe("Individual Parser functions", () => {
                     const result = parser.parse(source);
                     switch (result.variant) {
                         case Result.Variant.Err:
-                            expect(result.error).toEqual(errMessage);
+                            expect(result.error.message).toEqual(errMessage);
                             break;
 
                         case Result.Variant.Ok:
@@ -926,10 +932,10 @@ describe("Individual Parser functions", () => {
             const result = maybe(Parser.exact("abcde")).parse("abcdnope");
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    if (Maybe.isJust(result.value[0])) {
+                    if (Maybe.isJust(result.value.parsed)) {
                         fail("Should not have parsed");
                     }
-                    expect(Maybe.isNothing(result.value[0]));
+                    expect(Maybe.isNothing(result.value.parsed));
                     break;
 
                 case Result.Variant.Err:
@@ -974,7 +980,7 @@ describe("Individual Parser functions", () => {
 
                     switch (result.variant) {
                         case Result.Variant.Ok:
-                            expect(result.value[0]).toEqual(matches);
+                            expect(result.value.parsed).toEqual(matches);
                             break;
 
                         case Result.Variant.Err:
@@ -985,18 +991,21 @@ describe("Individual Parser functions", () => {
         });
 
         describe("with 'sequence', 'oneOf', and 'map'", () => {
-            const parser: Parser<
-                [string, string] | [string, string, string]
-            > = Parser.map(
-                ([a, maybeBOrC, d]) =>
-                    Maybe.isJust(maybeBOrC) ? [a, maybeBOrC.value, d] : [a, d],
+            const parser: Parser<[string, string] | [string, string, string]> =
+                Parser.map(
+                    ([a, maybeBOrC, d]) =>
+                        Maybe.isJust(maybeBOrC)
+                            ? [a, maybeBOrC.value, d]
+                            : [a, d],
 
-                Parser.sequence(
-                    Parser.exact("a"),
-                    maybe(Parser.oneOf(Parser.exact("b"), Parser.exact("c"))),
-                    Parser.exact("d"),
-                ),
-            );
+                    Parser.sequence(
+                        Parser.exact("a"),
+                        maybe(
+                            Parser.oneOf(Parser.exact("b"), Parser.exact("c")),
+                        ),
+                        Parser.exact("d"),
+                    ),
+                );
 
             const okCases: Array<[string, string[]]> = [
                 ["ad", ["a", "d"]],
@@ -1009,7 +1018,7 @@ describe("Individual Parser functions", () => {
 
                 switch (result.variant) {
                     case Result.Variant.Ok:
-                        expect(result.value[0]).toEqual(matches);
+                        expect(result.value.parsed).toEqual(matches);
                         break;
 
                     case Result.Variant.Err:
@@ -1029,7 +1038,7 @@ describe("Individual Parser functions", () => {
 
                 switch (result.variant) {
                     case Result.Variant.Err:
-                        expect(result.error).toBe(errMessage);
+                        expect(result.error.message).toBe(errMessage);
                         break;
 
                     case Result.Variant.Ok:

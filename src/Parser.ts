@@ -75,10 +75,10 @@ export namespace Parser {
     export const exact = (toMatch: string): Parser<string> =>
         Parser<string>((source: string, index: number = 0) => {
             if (source.slice(index, index + toMatch.length) === toMatch) {
-                return Result.Ok([toMatch, index + toMatch.length, source]);
+                return ParseSuccess(toMatch, index + toMatch.length, source);
             }
             const [location, context] = getErrorMessageContext(source, index);
-            return Result.Err(
+            return ParseError(
                 `${location}\nExpected "${toMatch}" but got "${source.slice(
                     index,
                     index + toMatch.length,
@@ -101,7 +101,7 @@ export namespace Parser {
      */
     export const succeed = <T>(value: T): Parser<T> =>
         Parser<T>((source: string, index: number = 0) =>
-            Result.Ok([value, index, source]),
+            ParseSuccess(value, index, source),
         );
 
     /**
@@ -119,7 +119,7 @@ export namespace Parser {
      * ```
      */
     export const fail = <T>(err: string = ""): Parser<T> =>
-        Parser<T>(() => Result.Err(err));
+        Parser<T>(() => ParseError(err));
 
     /**
      * A parser for reading zero or more whitespace characters.
@@ -230,13 +230,13 @@ export namespace Parser {
                     return result;
 
                 case Result.Variant.Ok:
-                    if (!Number.isSafeInteger(result.value[0])) {
+                    if (!Number.isSafeInteger(result.value.parsed)) {
                         const [location, context] = getErrorMessageContext(
                             source,
                             index,
                         );
-                        return Result.Err(
-                            `${location}\nExpected an integer but got "${result.value[0]}" instead\n\n${context}`,
+                        return ParseError(
+                            `${location}\nExpected an integer but got "${result.value.parsed}" instead\n\n${context}`,
                         );
                     }
                     return result;
@@ -251,7 +251,7 @@ export namespace Parser {
                     source,
                     index,
                 );
-                return Result.Err(
+                return ParseError(
                     `${location}\nExpected ${expected} but got "${source.charAt(
                         index,
                     )}" instead\n\n${context}`,
@@ -259,7 +259,7 @@ export namespace Parser {
             }
 
             const [matched] = match;
-            return Result.Ok([matched, index + matched.length, source]);
+            return ParseSuccess(matched, index + matched.length, source);
         });
 
     function getErrorMessageContext(
@@ -321,12 +321,12 @@ export namespace Parser {
             const results: T[] = [];
             let result: ParseResult<T> = parser.parse(source, index);
             while (Result.isOk(result)) {
-                const [value, newIndex] = result.value;
-                results.push(value);
+                const { parsed, index: newIndex } = result.value;
+                results.push(parsed);
                 index = newIndex;
                 result = parser.parse(source, index);
             }
-            return Result.Ok([results, index, source]);
+            return ParseSuccess(results, index, source);
         });
 
     /**
@@ -345,12 +345,12 @@ export namespace Parser {
             }
 
             while (Result.isOk(result)) {
-                const [value, newIndex] = result.value;
-                results.push(value);
+                const { parsed, index: newIndex } = result.value;
+                results.push(parsed);
                 index = newIndex;
                 result = parser.parse(source, index);
             }
-            return Result.Ok([results, index, source]);
+            return ParseSuccess(results, index, source);
         });
 
     /**
@@ -370,7 +370,7 @@ export namespace Parser {
                     return result;
                 }
             }
-            return result ?? Result.Err("No parsers provided");
+            return result ?? ParseError("No parsers provided");
         });
 
     /**
@@ -384,11 +384,11 @@ export namespace Parser {
     ): Parser<B> =>
         Parser<B>((source: string, index: number = 0) =>
             Result.map(
-                ([a, i]: [A, number, string]): [B, number, string] => [
-                    func(a),
-                    i,
+                ({ parsed, index }: ParseSuccess<A>): ParseSuccess<B> => ({
+                    parsed: func(parsed),
+                    index,
                     source,
-                ],
+                }),
                 parser.parse(source, index),
             ),
         );
@@ -604,12 +604,12 @@ export namespace Parser {
                         return result;
 
                     case Result.Variant.Ok:
-                        const [value, newIndex] = result.value;
-                        values[i] = value;
+                        const { parsed, index: newIndex } = result.value;
+                        values[i] = parsed;
                         index = newIndex;
                 }
             }
-            return Result.Ok([values, index, source]);
+            return ParseSuccess(values, index, source);
         });
     }
 }

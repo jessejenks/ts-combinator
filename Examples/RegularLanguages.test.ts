@@ -34,7 +34,7 @@ describe("simple regular expression /a(b|c)d*/", () => {
         const result = parser.parse(source);
         switch (result.variant) {
             case Result.Variant.Ok:
-                expect(result.value[0]).toEqual(matches);
+                expect(result.value.parsed).toEqual(matches);
                 break;
 
             case Result.Variant.Err:
@@ -57,7 +57,7 @@ describe("simple regular expression /a(b|c)d*/", () => {
         const result = parser.parse(source);
         switch (result.variant) {
             case Result.Variant.Err:
-                expect(result.error).toBe(errMessage);
+                expect(result.error.message).toBe(errMessage);
                 break;
 
             case Result.Variant.Ok:
@@ -115,7 +115,7 @@ describe("date parser", () => {
             const result = simpleDateParser.parse(source);
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toEqual(matche);
+                    expect(result.value.parsed).toEqual(matche);
                     break;
 
                 case Result.Variant.Err:
@@ -148,7 +148,7 @@ describe("date parser", () => {
         const result = dateParser.parse(source);
         switch (result.variant) {
             case Result.Variant.Ok:
-                expect(result.value[0]).toEqual(matche);
+                expect(result.value.parsed).toEqual(matche);
                 break;
 
             case Result.Variant.Err:
@@ -171,7 +171,7 @@ describe("date parser", () => {
         const result = dateParser.parse(source);
         switch (result.variant) {
             case Result.Variant.Err:
-                expect(result.error).toBe(errMessage);
+                expect(result.error.message).toBe(errMessage);
                 break;
 
             case Result.Variant.Ok:
@@ -246,7 +246,7 @@ describe("simple regular expression for phone numbers", () => {
         const result = parser.parse(source);
         switch (result.variant) {
             case Result.Variant.Ok:
-                expect(result.value[0]).toEqual(matches);
+                expect(result.value.parsed).toEqual(matches);
                 break;
 
             case Result.Variant.Err:
