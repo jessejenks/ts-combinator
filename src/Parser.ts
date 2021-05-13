@@ -1,6 +1,16 @@
 import { Maybe } from "./Maybe";
 import { Result } from "./Result";
 
+type ParseSuccess<T> = {
+    parsed: T;
+    index: number;
+    source: string;
+};
+
+type ParseError = {
+    message: string;
+};
+
 /**
  * A wrapper on the `Result` type, and the return type of the `parse` method on any parser.
  * In the `Ok` case, `ParseResult` returns the parsed value, the current index, the original input.
@@ -12,7 +22,19 @@ import { Result } from "./Result";
  * // Result.Ok<[string, number, string]>(["hello", 5, "hellorest of input"])
  * ```
  */
-export type ParseResult<T> = Result<[T, number, string], string>;
+export type ParseResult<T> = Result<ParseSuccess<T>, ParseError>;
+
+function ParseSuccess<T>(
+    parsed: T,
+    index: number,
+    source: string,
+): Result.Ok<ParseSuccess<T>> {
+    return Result.Ok({ parsed, index, source });
+}
+
+function ParseError(message: string): Result.Err<ParseError> {
+    return Result.Err({ message });
+}
 
 /**
  * The main `Parser` type.
