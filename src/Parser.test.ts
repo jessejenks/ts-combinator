@@ -66,6 +66,26 @@ describe("Individual Parser functions", () => {
         });
     });
 
+    describe("fail", () => {
+        const { fail } = Parser;
+
+        const cases: Array<[string, string]> = [
+            ["error message", "any source"],
+        ];
+
+        test.each(cases)("Always fails with '%s'", (errMessage, source) => {
+            const result = fail(errMessage).parse(source);
+            switch (result.variant) {
+                case Result.Variant.Err:
+                    expect(result.error).toMatch(errMessage);
+                    break;
+
+                case Result.Variant.Ok:
+                    fail("Should not have parsed");
+            }
+        });
+    });
+
     describe("spaces", () => {
         const { spaces } = Parser;
 

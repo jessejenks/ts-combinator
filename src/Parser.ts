@@ -83,6 +83,23 @@ export namespace Parser {
         );
 
     /**
+     * A parser which always fails with a given error message.
+     * Useful as a default value for an optional parser.
+     *
+     * @param err the error message to fail with
+     *
+     * @example
+     * ```ts
+     * function optionalArgument<T>(optionalParser: Parser<T> = fail<T>()) {
+     *     const result = optionalParser.parse(...);
+     *     if (Result.isOk(result)) { ... }
+     * }
+     * ```
+     */
+    export const fail = <T>(err: string = ""): Parser<T> =>
+        Parser<T>(() => Result.Err(err));
+
+    /**
      * A parser for reading zero or more whitespace characters.
      */
     export const spaces = (): Parser<string> => fromRegExp(/\s*/, "whitespace");
