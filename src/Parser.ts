@@ -1,14 +1,15 @@
 import { Maybe } from "./Maybe";
 import { Result } from "./Result";
 
-type ParseSuccess<T> = {
+export type ParseSuccess<T> = {
     parsed: T;
     index: number;
     source: string;
 };
 
-type ParseError = {
+export type ParseError = {
     message: string;
+    readonly backtrackable: boolean;
 };
 
 /**
@@ -24,7 +25,7 @@ type ParseError = {
  */
 export type ParseResult<T> = Result<ParseSuccess<T>, ParseError>;
 
-function ParseSuccess<T>(
+export function ParseSuccess<T>(
     parsed: T,
     index: number,
     source: string,
@@ -32,8 +33,11 @@ function ParseSuccess<T>(
     return Result.Ok({ parsed, index, source });
 }
 
-function ParseError(message: string): Result.Err<ParseError> {
-    return Result.Err({ message });
+export function ParseError(
+    message: string,
+    backtrackable: boolean = true,
+): Result.Err<ParseError> {
+    return Result.Err({ message, backtrackable });
 }
 
 /**
@@ -369,6 +373,9 @@ export namespace Parser {
                 if (Result.isOk(result)) {
                     return result;
                 }
+                if (!result.error.backtrackable) {
+                    return ParseError(result.error.message);
+                }
             }
             return result ?? ParseError("No parsers provided");
         });
@@ -421,6 +428,31 @@ export namespace Parser {
         Parser<T>((source: string, index: number = 0) =>
             factory().parse(source, index),
         );
+
+    export const conditional = <A, B>(
+        antecedent: Parser<A>,
+        consequent: Parser<B>,
+    ) =>
+        Parser<[A, B]>((source: string, index: number = 0) => {
+            const ant = antecedent.parse(source, index);
+            if (Result.isErr(ant)) {
+                return ant;
+            }
+
+            const { parsed: parsedAnt, index: newIndex } = ant.value;
+            index = newIndex;
+
+            const cons = consequent.parse(source, index);
+            if (Result.isErr(cons)) {
+                return ParseError(cons.error.message, false);
+            }
+
+            return ParseSuccess(
+                [parsedAnt, cons.value.parsed],
+                cons.value.index,
+                source,
+            );
+        });
 }
 
 export namespace Parser {

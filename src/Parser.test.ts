@@ -541,6 +541,61 @@ describe("Individual Parser functions", () => {
         });
     });
 
+    describe("conditional", () => {
+        const { conditional } = Parser;
+        const sequenceParser = Parser.sequence(
+            Parser.exact("a"),
+            Parser.exact("b"),
+        );
+        const conditionalParser = conditional(
+            Parser.exact("a"),
+            Parser.exact("b"),
+        );
+
+        it("Acts just like sequence with 2 parsers", () => {
+            let result = sequenceParser.parse("ab");
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value.parsed).toEqual(["a", "b"]);
+                    break;
+
+                case Result.Variant.Err:
+                    fail("Should not have parsed");
+            }
+
+            result = conditionalParser.parse("ab");
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value.parsed).toEqual(["a", "b"]);
+                    break;
+
+                case Result.Variant.Err:
+                    fail("Should not have parsed");
+            }
+        });
+
+        const errCases = [["a"], ["ad"], ["b"]];
+
+        test.each(errCases)("fails like sequence with 2 parsers", (source) => {
+            const sequenceResult = sequenceParser.parse(source);
+
+            const conditionalResult = conditionalParser.parse(source);
+
+            if (Result.isOk(sequenceResult)) {
+                fail("Should not have parsed");
+            }
+
+            if (Result.isOk(conditionalResult)) {
+                console.log(conditionalResult);
+                fail("Should not have parsed");
+            }
+
+            expect(conditionalResult.error.message).toBe(
+                sequenceResult.error.message,
+            );
+        });
+    });
+
     describe("zeroOrMore", () => {
         const { zeroOrMore } = Parser;
 
