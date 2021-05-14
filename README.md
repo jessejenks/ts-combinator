@@ -173,7 +173,7 @@ const dateParser = map(
 Finally, the best part is that when a match fails, instead of just `null`, we
 can get nicer error messages.
 ```js
-dateParser.parse("2021/03-27");
+dateParser.parse("2021-03/27");
 // Error at (line: 1, column: 8)
 // Expected "-" but got "/" instead
 // 
@@ -183,11 +183,8 @@ dateParser.parse("2021/03-27");
 
 # Terminology
 
-I am using "combinator" quite loosely here, since the goal in using TypeScript
-is to take advantage of the benefits of parser combinators, while still having
-the flexibility of writing functions which are not technically combinators. But
-what is a combinator is a (usually higher-order) function which only refers to
-its arguments.
+A combinator is a (usually higher-order) function which only refers to its
+arguments.
 
 For example
 ```js
@@ -200,7 +197,7 @@ is a combinator. But something like
 const eval = (f, x) => f(x, y);
 ```
 
-is not.
+is not, since `y` is not an argument of `eval`.
 
 
 A famous example is the "Y-combinator".
@@ -209,21 +206,16 @@ A famous example is the "Y-combinator".
 const y = f => (x => f(x(x)))(x => f(x(x)));
 ```
 
-So combinators are necessarily pure functions. However, it is often useful to
-write pure functions which refer to other variables available in the current
-scope. For example
-
-```js
-function cleanInput(x) { /* ... */ }
-const eval = (f, x) => f(cleanInput(x));
-```
-
-As long as `cleanInput` is pure, `eval` will be pure. But now `eval` is not a
-combinator. Instead, this is a pure [closure](https://whatthefuck.is/closure).
+However, I use the term "combinator" quite loosely, since the point of using
+TypeScript is to get both the benefits of parser combinators, while still having
+the flexibility of writing functions which are not technically combinators.
 
 # Changelog
 
 ## [Unreleased]
+
+## Added
+- Conditional parser
 
 ## Changed
 - Updates to index-based system
