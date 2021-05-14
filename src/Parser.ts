@@ -429,6 +429,17 @@ export namespace Parser {
             factory().parse(source, index),
         );
 
+    /**
+     * A parser to be used in conjunction with `oneOf`. Used for "committing" to one of the parsers passed to `oneOf`.
+     * Useful when using `oneOf`, and one of the parsers requires matching values. See Conditionals.md for examples.
+     *
+     * This is primarily for better error messages and does not affect the correctness of a parser.
+     * See `Conditionals.md` for examples and motivation.
+     *
+     * @param antecedent The parser which decides whether `oneOf` should commit to this branch.
+     * @param consequent The parser to run if `antecedent` succeeds. The error from this parser is the error returned by
+     * the `oneOf` parser
+     */
     export const conditional = <A, B>(
         antecedent: Parser<A>,
         consequent: Parser<B>,
