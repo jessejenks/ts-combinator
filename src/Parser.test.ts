@@ -594,6 +594,45 @@ describe("Individual Parser functions", () => {
                 sequenceResult.error.message,
             );
         });
+
+        const innerParser = Parser.map(
+            ([, [digit]]) => digit,
+            Parser.oneOf(
+                conditional(
+                    Parser.exact("<"),
+                    Parser.sequence(Parser.singleDigit(), Parser.exact(">")),
+                ),
+                conditional(
+                    Parser.exact("{"),
+                    Parser.sequence(Parser.singleDigit(), Parser.exact("}")),
+                ),
+            ),
+        );
+        const outerParser = Parser.oneOf(innerParser, Parser.exact("<a>"));
+
+        it("Does not propagate backtracking after first oneOf", () => {
+            let result = innerParser.parse("<a>");
+            switch (result.variant) {
+                case Result.Variant.Err:
+                    expect(result.error.message).toBe(
+                        'Error at (line: 1, column: 2)\nExpected a digit but got "a" instead\n\n<a>\n ^',
+                    );
+                    break;
+
+                case Result.Variant.Ok:
+                    fail("Should not have parsed");
+            }
+
+            result = outerParser.parse("<a>");
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value.parsed).toBe("<a>");
+                    break;
+
+                case Result.Variant.Err:
+                    fail(result.error.message);
+            }
+        });
     });
 
     describe("zeroOrMore", () => {
