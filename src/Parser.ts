@@ -330,6 +330,9 @@ export namespace Parser {
                 index = newIndex;
                 result = parser.parse(source, index);
             }
+            if (!result.error.backtrackable) {
+                return ParseError(result.error.message);
+            }
             return ParseSuccess(results, index, source);
         });
 
@@ -353,6 +356,9 @@ export namespace Parser {
                 results.push(parsed);
                 index = newIndex;
                 result = parser.parse(source, index);
+            }
+            if (!result.error.backtrackable) {
+                return ParseError(result.error.message);
             }
             return ParseSuccess(results, index, source);
         });

@@ -1,9 +1,19 @@
 import { Result } from "../src/Result";
 import { Parser } from "../src/Parser";
 
-const { singleDigit, alpha, exact, map, sequence, conditional, oneOf } = Parser;
+const {
+    singleDigit,
+    alpha,
+    exact,
+    map,
+    sequence,
+    conditional,
+    oneOf,
+    oneOrMore,
+    zeroOrMore,
+} = Parser;
 
-describe("simple example", () => {
+describe("simple comparison with oneOf and sequence", () => {
     const basicParser = map(
         ([, word]) => word,
         oneOf(
@@ -195,6 +205,85 @@ describe("date parser", () => {
         "Does not parse date in '%s', but with better error message",
         (source, errMessage) => {
             const result = conditionalDateParser.parse(source);
+            switch (result.variant) {
+                case Result.Variant.Err:
+                    expect(result.error.message).toBe(errMessage);
+                    break;
+
+                case Result.Variant.Ok:
+                    fail("Should not have parsed");
+            }
+        },
+    );
+});
+
+describe("with zeroOrMore and oneOrMore", () => {
+    const oneOrMoreParser = oneOrMore(
+        map(([, a]) => a, sequence(exact("<"), alpha(), exact(">"))),
+    );
+    const zeroOrMoreParser = zeroOrMore(
+        map(([, a]) => a, sequence(exact("<"), alpha(), exact(">"))),
+    );
+
+    const okCases: Array<[string, string[]]> = [
+        ["<abc><123>", ["abc"]],
+        ["<hello><how><are><123><you>", ["hello", "how", "are"]],
+    ];
+
+    test.each(okCases)("does parse '%s'", (source, parsed) => {
+        let result = oneOrMoreParser.parse(source);
+        switch (result.variant) {
+            case Result.Variant.Ok:
+                expect(result.value.parsed).toEqual(parsed);
+                break;
+
+            case Result.Variant.Err:
+                fail("Should not have parsed");
+        }
+
+        result = zeroOrMoreParser.parse(source);
+        switch (result.variant) {
+            case Result.Variant.Ok:
+                expect(result.value.parsed).toEqual(parsed);
+                break;
+
+            case Result.Variant.Err:
+                fail(result.error.message);
+        }
+    });
+
+    const conditionalOneOrMoreParser = oneOrMore(
+        conditional(exact("<"), sequence(alpha(), exact(">"))),
+    );
+    const conditionalZeroOrMoreParser = zeroOrMore(
+        conditional(exact("<"), sequence(alpha(), exact(">"))),
+    );
+
+    const conditionalErrCases: Array<[string, string]> = [
+        [
+            "<abc><123>",
+            'Error at (line: 1, column: 7)\nExpected characters but got "1" instead\n\n<abc><123>\n      ^',
+        ],
+        [
+            "<hello><how><are><123><you>",
+            'Error at (line: 1, column: 19)\nExpected characters but got "1" instead\n\nhow><are><123><you>\n          ^',
+        ],
+    ];
+
+    test.each(conditionalErrCases)(
+        "does not parse '%s'",
+        (source, errMessage) => {
+            let result = conditionalOneOrMoreParser.parse(source);
+            switch (result.variant) {
+                case Result.Variant.Err:
+                    expect(result.error.message).toBe(errMessage);
+                    break;
+
+                case Result.Variant.Ok:
+                    fail("Should not have parsed");
+            }
+
+            result = conditionalZeroOrMoreParser.parse(source);
             switch (result.variant) {
                 case Result.Variant.Err:
                     expect(result.error.message).toBe(errMessage);
