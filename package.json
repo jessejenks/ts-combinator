@@ -2,8 +2,7 @@
     "name": "@jessejenks/ts-combinator",
     "version": "2.2.0",
     "description": "simple typescript combinator library",
-    "main": "dist/index.js",
-    "module": "dist/index.cjs.js",
+    "main": "dist/index",
     "source": "src/index.ts",
     "repository": {
         "type": "git",

@@ -9,11 +9,11 @@ const options = {
     input: "src/",
     output: [
         {
-            file: "dist/index.js",
+            file: "dist/index.mjs",
             format: "es",
         },
         {
-            file: "dist/index.cjs.js",
+            file: "dist/index.js",
             format: "cjs",
         },
     ],

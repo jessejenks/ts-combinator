@@ -498,9 +498,7 @@ export namespace Parser {
                 source,
             );
         });
-}
 
-export namespace Parser {
     /**
      * Accepts a list of parsers and succeeds only if they all succeed.
      *
