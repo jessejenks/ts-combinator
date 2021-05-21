@@ -1,12 +1,20 @@
 import { Maybe } from "./Maybe";
 import { Result } from "./Result";
 
+/**
+ * The result of a successful parse. Holds information on the parsed value, the index in the source after parsing, and
+ * the original source.
+ */
 export type ParseSuccess<T> = {
     parsed: T;
     index: number;
     source: string;
 };
 
+/**
+ * The result of an unsuccessful parse. Holds the error message and a field indicating whether other combinators should
+ * attempt to backtrack.
+ */
 export type ParseError = {
     message: string;
     readonly backtrackable: boolean;
@@ -14,17 +22,31 @@ export type ParseError = {
 
 /**
  * A wrapper on the `Result` type, and the return type of the `parse` method on any parser.
- * In the `Ok` case, `ParseResult` returns the parsed value, the current index, the original input.
- * In the `Err` case returns an error message as a string.
+ * In the `Ok` case, `ParseResult` returns a `ParseSuccess`.
+ * In the `Err` case returns a `ParseError`.
  *
  * @example
  * ```ts
  * const result: ParseResult<string> = exact("hello").parse("hellorest of input");
- * // Result.Ok<[string, number, string]>(["hello", 5, "hellorest of input"])
+ * // Result.Ok<ParseSuccess<string>>
+ * result = {
+ *     variant: "Ok",
+ *     value: {
+ *         parsed: "hello",
+ *         index: 5,
+ *         source: "hellorest of input",
+ *     },
+ * }
  * ```
  */
 export type ParseResult<T> = Result<ParseSuccess<T>, ParseError>;
 
+/**
+ * Constructs a `ParseSuccess` object.
+ * @param parsed The parsed value
+ * @param index The index in the source string after the parsed value
+ * @param source The original source string
+ */
 export function ParseSuccess<T>(
     parsed: T,
     index: number,
@@ -33,6 +55,12 @@ export function ParseSuccess<T>(
     return Result.Ok({ parsed, index, source });
 }
 
+/**
+ * Constructs a `ParseError` object.
+ * @param message The error message
+ * @param backtrackable An optional field indicating whether other combinators should attempt to backtrack. You probably
+ * don't want to pass any value for this
+ */
 export function ParseError(
     message: string,
     backtrackable: boolean = true,
@@ -62,7 +90,7 @@ export namespace Parser {
     /**
      * Creates a new `Parser`.
      *
-     * Accepts a function which takes a source string, and returns a {@link ParseResult}.
+     * Accepts a function which takes a source string and index, and returns a {@link ParseResult}.
      *
      * @see ParseResult
      */
@@ -73,7 +101,7 @@ export namespace Parser {
     }
 
     /**
-     *
+     * Matches a given string exactly.
      * @param toMatch the exact string to match
      */
     export const exact = (toMatch: string): Parser<string> =>
@@ -98,9 +126,9 @@ export namespace Parser {
      *
      * @example
      * ```ts
-     * oneOf(exact("a"), exact("b"), succeed("default")).parse("c")
+     * const result = oneOf(exact("a"), exact("b"), succeed("default")).parse("c")
      * // consumed no characters, but succeeded with default value
-     * // Result.Ok(["default", "c"])
+     * result = { parsed: "default", index: 0, source: "c" }
      * ```
      */
     export const succeed = <T>(value: T): Parser<T> =>
@@ -436,13 +464,13 @@ export namespace Parser {
         );
 
     /**
-     * A parser to be used in conjunction with `oneOf`. Used for "committing" to one of the parsers passed to `oneOf`.
+     * A parser to be used in conjunction with `oneOf`, `zeroOrMore`, or `oneOrMore`. Used for "committing" to a parse.
      * Useful when using `oneOf`, and one of the parsers requires matching values. See Conditionals.md for examples.
      *
      * This is primarily for better error messages and does not affect the correctness of a parser.
      * See `Conditionals.md` for examples and motivation.
      *
-     * @param antecedent The parser which decides whether `oneOf` should commit to this branch.
+     * @param antecedent The parser which decides whether another combinator should commit to this branch.
      * @param consequent The parser to run if `antecedent` succeeds. The error from this parser is the error returned by
      * the `oneOf` parser
      */

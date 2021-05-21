@@ -8,16 +8,20 @@ The goal of this project is to make simple parsers more readable and
 declarative. No more indexing into a `RegExpExecArray` and hope you grabbed the
 right group.
 
-So far, this library is powerful enough to match arbitrary regular languages.
-But this is not a high bar. What make parser combinators so powerful (in my
-mind) are
-- the ability to _transform while matching_
+There are many techniques for writing parsers, but what make parser combinators
+so powerful are
 - Readability
 - Reusability
+- the ability to transform while matchings
+
+Finally, this library is capable of parsing languages which cannot normally be
+parsed by regular expressions.
 
 ## Motivation
 
-Consider this simple example with date strings.
+Consider this simple example with date strings. We want to match dates in the
+`YYYY-MM-DD` format. Using regular expressions we might write something like the
+following.
 
 ```ts
 const re = /^(\d{4})-(\d{2})-(\d{2})/
@@ -52,11 +56,11 @@ function parseDate(source: string) {
 }
 ```
 
-Just a little bit harder to read, but ok fine.
+A little bit harder to read, but still ok.
 
 But we have introduces a small problem. Now we match strings like `"2021-03/26"`
 and `"2021/03-26"`! Maybe this is ok and maybe it isn't. How would we update our
-regular expression now?
+regular expression to make sure these are not accepted?
 
 ```ts
 const re = /^(\d{4})((-(\d{2})-(\d{2}))|(\/(\d{2})\/(\d{2})))/;
@@ -71,10 +75,10 @@ function parseDate(source) {
 }
 ```
 
-Ah yes, of course.
+Now we really have a maintainance problem.
 
 The situation can be improved somewhat with an explicit `RegExp` constructor and
-template strings.
+template strings. Something like this.
 
 ```ts
 const year = /\d{4}/.source;
@@ -181,6 +185,10 @@ dateParser.parse("2021-03/27");
 //        ^
 ```
 
+We can also get finer control over parsing and error messages with the
+`conditional` combinator. See the [Conditionals](./Conditionals.md) documentat
+for more details.
+
 # Terminology
 
 A combinator is a (usually higher-order) function which only refers to its
@@ -220,6 +228,7 @@ the flexibility of writing functions which are not technically combinators.
 ## Changed
 - Updates to index-based system
 - Adds better error messages
+- Parse result format
 
 ## [2.2.0] : 2021-04-02
 
