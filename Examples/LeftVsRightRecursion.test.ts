@@ -12,7 +12,6 @@ const {
     oneOf,
     int,
     toBinaryOperator,
-    toUnaryOperator,
     pratt,
 } = Parser;
 
@@ -92,7 +91,7 @@ describe("Right Recursive", () => {
             let result = exprParser.parse(source);
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toBe(expectedValue);
+                    expect(result.value.parsed).toBe(expectedValue);
                     break;
 
                 case Result.Variant.Err:
@@ -129,7 +128,7 @@ describe("Right Recursive Pratt", () => {
                 let result = exprParser.parse(source);
                 switch (result.variant) {
                     case Result.Variant.Ok:
-                        expect(result.value[0]).toBe(expectedValue);
+                        expect(result.value.parsed).toBe(expectedValue);
                         break;
 
                     case Result.Variant.Err:
@@ -158,7 +157,7 @@ describe("Right Recursive Pratt", () => {
                 let result = exprParser.parse(source);
                 switch (result.variant) {
                     case Result.Variant.Ok:
-                        expect(result.value[0]).toBe(expectedValue);
+                        expect(result.value.parsed).toBe(expectedValue);
                         break;
 
                     case Result.Variant.Err:
@@ -196,7 +195,7 @@ describe("Left Recursive Pratt", () => {
                 let result = exprParser.parse(source);
                 switch (result.variant) {
                     case Result.Variant.Ok:
-                        expect(result.value[0]).toBe(expectedValue);
+                        expect(result.value.parsed).toBe(expectedValue);
                         break;
 
                     case Result.Variant.Err:
@@ -225,7 +224,7 @@ describe("Left Recursive Pratt", () => {
                 let result = exprParser.parse(source);
                 switch (result.variant) {
                     case Result.Variant.Ok:
-                        expect(result.value[0]).toBe(expectedValue);
+                        expect(result.value.parsed).toBe(expectedValue);
                         break;
 
                     case Result.Variant.Err:
