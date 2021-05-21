@@ -77,7 +77,7 @@ describe("Pratt parser features", () => {
                 let result = exprParser.parse(source);
                 switch (result.variant) {
                     case Result.Variant.Ok:
-                        expect(result.value[0]).toBe(expectedValue);
+                        expect(result.value.parsed).toBe(expectedValue);
                         break;
 
                     case Result.Variant.Err:
@@ -238,7 +238,7 @@ describe("Pratt parser type features", () => {
             let result = exprParser.parse(source);
             switch (result.variant) {
                 case Result.Variant.Ok:
-                    expect(result.value[0]).toEqual(expectedValue);
+                    expect(result.value.parsed).toEqual(expectedValue);
                     break;
 
                 case Result.Variant.Err:
@@ -263,7 +263,7 @@ describe("Pratt parser type features", () => {
             let result = exprParser.parse(source);
             switch (result.variant) {
                 case Result.Variant.Err:
-                    expect(result.error).toMatch(expectedValue);
+                    expect(result.error.message).toMatch(expectedValue);
                     break;
 
                 case Result.Variant.Ok:

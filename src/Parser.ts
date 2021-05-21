@@ -748,14 +748,14 @@ export namespace Parser {
                 let full: Acc | T;
                 const prefixResult =
                     prefix === undefined
-                        ? Result.Err("")
+                        ? ParseError("")
                         : prefix.op.parse(source, index);
 
                 if (Result.isOk(prefixResult)) {
-                    const [
-                        { symbol, bindingPower: rightBindingPower },
-                        newIndex,
-                    ] = prefixResult.value;
+                    const {
+                        parsed: { symbol, bindingPower: rightBindingPower },
+                        index: newIndex,
+                    } = prefixResult.value;
                     index = newIndex;
 
                     const rhs = expr(rightBindingPower);
@@ -765,16 +765,16 @@ export namespace Parser {
 
                     full =
                         prefix === undefined
-                            ? rhs.value[0]
-                            : prefix.acc(symbol, rhs.value[0]);
+                            ? rhs.value.parsed
+                            : prefix.acc(symbol, rhs.value.parsed);
                 } else {
                     const scopeBeginResult =
                         scope === undefined
-                            ? Result.Err("")
+                            ? ParseError("")
                             : scope.scopeBegin.parse(source, index);
 
                     if (Result.isOk(scopeBeginResult)) {
-                        index = scopeBeginResult.value[1];
+                        index = scopeBeginResult.value.index;
                         const lhs = expr(0);
 
                         if (Result.isErr(lhs)) {
@@ -783,21 +783,21 @@ export namespace Parser {
 
                         const scopeEndResult =
                             scope === undefined
-                                ? Result.Err("")
+                                ? ParseError("")
                                 : scope.scopeEnd.parse(source, index);
 
                         if (Result.isErr(scopeEndResult)) {
                             return scopeEndResult;
                         }
-                        index = scopeEndResult.value[1];
-                        full = lhs.value[0];
+                        index = scopeEndResult.value.index;
+                        full = lhs.value.parsed;
                     } else {
                         const lhs = left.parse(source, index);
                         if (Result.isErr(lhs)) {
                             return lhs;
                         }
-                        full = lhs.value[0];
-                        index = lhs.value[1];
+                        full = lhs.value.parsed;
+                        index = lhs.value.index;
                     }
                 }
 
@@ -808,14 +808,14 @@ export namespace Parser {
 
                     const postfixResult =
                         postfix === undefined
-                            ? Result.Err("")
+                            ? ParseError("")
                             : postfix.op.parse(source, index);
 
                     if (Result.isOk(postfixResult)) {
-                        const [
-                            { symbol, bindingPower: leftBindingPower },
-                            newIndex,
-                        ] = postfixResult.value;
+                        const {
+                            parsed: { symbol, bindingPower: leftBindingPower },
+                            index: newIndex,
+                        } = postfixResult.value;
                         if (leftBindingPower < minBindingPower) {
                             break;
                         }
@@ -830,7 +830,7 @@ export namespace Parser {
 
                     const scopeEndResult =
                         scope === undefined
-                            ? Result.Err("")
+                            ? ParseError("")
                             : scope.scopeEnd.parse(source, index);
 
                     if (Result.isOk(scopeEndResult)) {
@@ -841,7 +841,10 @@ export namespace Parser {
                     if (Result.isErr(op)) {
                         return op;
                     }
-                    const [{ symbol, bindingPower }, newIndex] = op.value;
+                    const {
+                        parsed: { symbol, bindingPower },
+                        index: newIndex,
+                    } = op.value;
                     const [leftBindingPower, rightBindingPower] = bindingPower;
                     if (leftBindingPower < minBindingPower) {
                         break;
@@ -852,9 +855,9 @@ export namespace Parser {
                     if (Result.isErr(rhs)) {
                         return rhs;
                     }
-                    full = infix.acc(symbol, full, rhs.value[0]);
+                    full = infix.acc(symbol, full, rhs.value.parsed);
                 }
-                return Result.Ok([full, index, source]);
+                return ParseSuccess(full, index, source);
             }
 
             return expr();
