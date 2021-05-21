@@ -222,6 +222,8 @@ the flexibility of writing functions which are not technically combinators.
 
 ## [Unreleased]
 
+## [3.0.0] : 2021-05-21
+
 ## Added
 - Conditional parser
 
@@ -268,7 +270,8 @@ the flexibility of writing functions which are not technically combinators.
 - Some atomic parsers
 - Basic Combinators to parse regular languages
 
-[Unreleased]: https://github.com/jessejenks/ts-combinator/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/jessejenks/ts-combinator/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v3.0.0
 [2.2.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v2.2.0
 [2.1.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v2.1.0
 [2.0.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v2.0.0
