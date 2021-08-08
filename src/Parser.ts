@@ -688,3 +688,204 @@ export namespace Parser {
         });
     }
 }
+
+export namespace Parser {
+    export type UnaryOperator<T = string> = {
+        symbol: T;
+        bindingPower: number;
+    };
+    export const toUnaryOperator = <T = string>(
+        operatorSymbol: Parser<T>,
+        bindingPower: number,
+    ): Parser<UnaryOperator<T>> =>
+        map(
+            ([, symbol]) => ({
+                symbol,
+                bindingPower,
+            }),
+            sequence(spaces(), operatorSymbol, spaces()),
+        );
+
+    export type BinaryOperator<T = string> = {
+        symbol: T;
+        bindingPower: [number, number];
+    };
+    export const toBinaryOperator = <T = string>(
+        operatorSymbol: Parser<T>,
+        bindingPower: [number, number],
+    ): Parser<BinaryOperator<T>> =>
+        map(
+            ([, symbol]) => ({
+                symbol,
+                bindingPower,
+            }),
+            sequence(spaces(), operatorSymbol, spaces()),
+        );
+
+    export type OperatorOptions<
+        T,
+        Acc = T,
+        Infix = string,
+        Prefix = string,
+        Postfix = string,
+    > = {
+        infix: {
+            op: Parser<BinaryOperator<Infix>>;
+            acc: (symbol: Infix, left: Acc | T, right: Acc | T) => Acc;
+        };
+        prefix?: {
+            op: Parser<UnaryOperator<Prefix>>;
+            acc: (symbol: Prefix, right: Acc | T) => Acc;
+        };
+        postfix?: {
+            op: Parser<UnaryOperator<Postfix>>;
+            acc: (symbol: Postfix, left: Acc | T) => Acc;
+        };
+        scope?: {
+            scopeBegin: Parser<string>;
+            scopeEnd: Parser<string>;
+        };
+    };
+
+    /**
+     * A Pratt parser is a parser based on the paper [top-down operator precedence](https://tdop.github.io/) by
+     * Vaughan Pratt.
+     * Many thanks to [this blog post](https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html) from
+     * [Aleksey Kladov](https://matklad.github.io)
+     */
+    export const pratt = <
+        T,
+        Acc = T,
+        Infix = string,
+        Prefix = string,
+        Postfix = string,
+    >(
+        left: Parser<T>,
+        {
+            infix,
+            prefix,
+            postfix,
+            scope,
+        }: OperatorOptions<T, Acc, Infix, Prefix, Postfix>,
+    ): Parser<Acc | T> =>
+        Parser<Acc | T>((source: string, index: number = 0) => {
+            const isEof = () => index === source.length;
+            function expr(minBindingPower: number = 0): ParseResult<Acc | T> {
+                let full: Acc | T;
+                const prefixResult =
+                    prefix === undefined
+                        ? ParseError("")
+                        : prefix.op.parse(source, index);
+
+                if (Result.isOk(prefixResult)) {
+                    const {
+                        parsed: { symbol, bindingPower: rightBindingPower },
+                        index: newIndex,
+                    } = prefixResult.value;
+                    index = newIndex;
+
+                    const rhs = expr(rightBindingPower);
+                    if (Result.isErr(rhs)) {
+                        return rhs;
+                    }
+
+                    full =
+                        prefix === undefined
+                            ? rhs.value.parsed
+                            : prefix.acc(symbol, rhs.value.parsed);
+                } else {
+                    const scopeBeginResult =
+                        scope === undefined
+                            ? ParseError("")
+                            : scope.scopeBegin.parse(source, index);
+
+                    if (Result.isOk(scopeBeginResult)) {
+                        index = scopeBeginResult.value.index;
+                        const lhs = expr(0);
+
+                        if (Result.isErr(lhs)) {
+                            return lhs;
+                        }
+
+                        const scopeEndResult =
+                            scope === undefined
+                                ? ParseError("")
+                                : scope.scopeEnd.parse(source, index);
+
+                        if (Result.isErr(scopeEndResult)) {
+                            return scopeEndResult;
+                        }
+                        index = scopeEndResult.value.index;
+                        full = lhs.value.parsed;
+                    } else {
+                        const lhs = left.parse(source, index);
+                        if (Result.isErr(lhs)) {
+                            return lhs;
+                        }
+                        full = lhs.value.parsed;
+                        index = lhs.value.index;
+                    }
+                }
+
+                while (true) {
+                    if (isEof()) {
+                        break;
+                    }
+
+                    const postfixResult =
+                        postfix === undefined
+                            ? ParseError("")
+                            : postfix.op.parse(source, index);
+
+                    if (Result.isOk(postfixResult)) {
+                        const {
+                            parsed: { symbol, bindingPower: leftBindingPower },
+                            index: newIndex,
+                        } = postfixResult.value;
+                        if (leftBindingPower < minBindingPower) {
+                            break;
+                        }
+                        index = newIndex;
+
+                        full =
+                            postfix === undefined
+                                ? full
+                                : postfix.acc(symbol, full);
+                        continue;
+                    }
+
+                    const scopeEndResult =
+                        scope === undefined
+                            ? ParseError("")
+                            : scope.scopeEnd.parse(source, index);
+
+                    if (Result.isOk(scopeEndResult)) {
+                        break;
+                    }
+
+                    const op = infix.op.parse(source, index);
+                    if (Result.isErr(op)) {
+                        return op;
+                    }
+                    const {
+                        parsed: { symbol, bindingPower },
+                        index: newIndex,
+                    } = op.value;
+                    const [leftBindingPower, rightBindingPower] = bindingPower;
+                    if (leftBindingPower < minBindingPower) {
+                        break;
+                    }
+                    index = newIndex;
+
+                    const rhs = expr(rightBindingPower);
+                    if (Result.isErr(rhs)) {
+                        return rhs;
+                    }
+                    full = infix.acc(symbol, full, rhs.value.parsed);
+                }
+                return ParseSuccess(full, index, source);
+            }
+
+            return expr();
+        });
+}
