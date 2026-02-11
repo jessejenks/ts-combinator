@@ -1,7 +1,7 @@
 import nodeResolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import babel from "@rollup/plugin-babel";
-import tsconfig from "./tsconfig.json";
+import tsconfig from "./tsconfig.json" with { type: "json" };
 
 const extensions = [".js", ".jsx", ".ts", ".tsx"];
 
