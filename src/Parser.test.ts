@@ -1141,4 +1141,38 @@ describe("Individual Parser functions", () => {
             });
         });
     });
+
+    describe("completely",() => {
+        const { exact, completely } = Parser;
+
+        const okCases: Array<[string, string]> = [["hello", "hello"]];
+
+        test.each(okCases)("Matches '%s' against '%s'", (toMatch, source) => {
+            const result = completely(exact(toMatch)).parse(source);
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value.parsed).toBe(toMatch);
+                    break;
+
+                case Result.Variant.Err:
+                    fail(result.error);
+            }
+        });
+
+        const errCases: Array<[string, string, string]> = [["hello", "hello world", 'Error at (line: 1, column: 6)\nExpected end of input but got " world" instead\n\nhello world\n     ^']];
+        test.each(errCases)(
+            "Does not match '%s' against '%s'",
+            (toMatch, source, errMessage) => {
+                const result = completely(exact(toMatch)).parse(source);
+                switch (result.variant) {
+                    case Result.Variant.Err:
+                        expect(result.error.message).toBe(errMessage);
+                        break;
+
+                    case Result.Variant.Ok:
+                        fail("Should not have parsed");
+                }
+            },
+        );
+    })
 });

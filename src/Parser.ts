@@ -153,6 +153,32 @@ export namespace Parser {
     export const fail = <T>(err: string = ""): Parser<T> =>
         Parser<T>(() => ParseError(err));
 
+
+    const pi0 = <T>(a: [T, ...any]): T => a[0]
+
+    /**
+     * A parser which succeeds with a value of `null` at the end of the input and fails otherwise.
+     *
+     * Most likely you want to just use {@link completely} defined in the example.
+     *
+     * @example
+     * ```ts
+     * const completely = map(([x]) => x, sequence(parser, end())
+     * ```
+     */
+    export const end = () => Parser((source: string, index: number = 0) => {
+        if (index === source.length) {
+            return ParseSuccess(null, index, source);
+        } else {
+            const [location, context] = getErrorMessageContext(source, index);
+            return ParseError(
+                `${location}\nExpected end of input but got "${source.slice(index, index + 10)}" instead\n\n${context}`,
+            );
+        }
+    });
+
+    export const completely = <T>(parser: Parser<T>) => map(pi0, sequence(parser, end()))
+
     /**
      * A parser for reading zero or more whitespace characters.
      */
