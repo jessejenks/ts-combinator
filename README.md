@@ -222,9 +222,22 @@ the flexibility of writing functions which are not technically combinators.
 
 ## [Unreleased]
 
+## [3.1.1] : 2026-02-12
+### Changed
+- Updated rollup config
+
+## [3.1.0] : 2026-02-11
+
+### Added 
+- `end` and `completely` combinators.
+
+### Changed
+- Upgraded dependencies
+- Made package type "module"
+
 ## [3.0.0] : 2021-05-21
 
-## Added
+### Added
 - Conditional parser
 
 ## Changed

@@ -1,9 +1,15 @@
 {
     "name": "@jessejenks/ts-combinator",
-    "version": "3.1.0",
+    "version": "3.1.1",
     "type": "module",
     "description": "simple typescript combinator library",
-    "main": "dist/index",
+    "main": "dist/index.js",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs"
+        }
+    },
     "source": "src/index.ts",
     "repository": {
         "type": "git",
