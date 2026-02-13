@@ -792,9 +792,7 @@ export namespace Parser {
             return ParseSuccess(values, index, source);
         });
     }
-}
 
-export namespace Parser {
     export type UnaryOperator<T = string> = {
         symbol: T;
         bindingPower: number;
