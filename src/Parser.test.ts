@@ -1049,8 +1049,8 @@ describe("Individual Parser functions", () => {
                             ? [a, maybeB.value, maybeC.value, d]
                             : [a, maybeB.value, d]
                         : Maybe.isJust(maybeC)
-                        ? [a, maybeC.value, d]
-                        : [a, d],
+                          ? [a, maybeC.value, d]
+                          : [a, d],
 
                 Parser.sequence(
                     Parser.exact("a"),
@@ -1142,7 +1142,7 @@ describe("Individual Parser functions", () => {
         });
     });
 
-    describe("completely",() => {
+    describe("completely", () => {
         const { exact, completely } = Parser;
 
         const okCases: Array<[string, string]> = [["hello", "hello"]];
@@ -1159,7 +1159,13 @@ describe("Individual Parser functions", () => {
             }
         });
 
-        const errCases: Array<[string, string, string]> = [["hello", "hello world", 'Error at (line: 1, column: 6)\nExpected end of input but got " world" instead\n\nhello world\n     ^']];
+        const errCases: Array<[string, string, string]> = [
+            [
+                "hello",
+                "hello world",
+                'Error at (line: 1, column: 6)\nExpected end of input but got " world" instead\n\nhello world\n     ^',
+            ],
+        ];
         test.each(errCases)(
             "Does not match '%s' against '%s'",
             (toMatch, source, errMessage) => {
@@ -1174,5 +1180,5 @@ describe("Individual Parser functions", () => {
                 }
             },
         );
-    })
+    });
 });

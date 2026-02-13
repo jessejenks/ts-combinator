@@ -51,8 +51,8 @@ export const detectCasing = oneOf(
             Maybe.isNothing(maybePieces) || maybePieces.value.length === 0
                 ? Casing.Camel
                 : maybePieces.value[0][0] === "_"
-                ? Casing.Snake
-                : Casing.Camel,
+                  ? Casing.Snake
+                  : Casing.Camel,
 
         sequence(
             lower(),
