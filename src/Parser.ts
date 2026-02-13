@@ -104,8 +104,8 @@ export namespace Parser {
      * Matches a given string exactly.
      * @param toMatch the exact string to match
      */
-    export const exact = (toMatch: string): Parser<string> =>
-        Parser<string>((source: string, index: number = 0) => {
+    export const exact = <T extends string = string>(toMatch: T): Parser<T> =>
+        Parser<T>((source: string, index: number = 0) => {
             if (source.slice(index, index + toMatch.length) === toMatch) {
                 return ParseSuccess(toMatch, index + toMatch.length, source);
             }
@@ -421,6 +421,80 @@ export namespace Parser {
             return ParseSuccess(results, index, source);
         });
 
+    export function oneOf(): Parser<never>;
+    export function oneOf<A, B>(
+        parserA: Parser<A>,
+        parserB: Parser<B>,
+    ): Parser<A | B>;
+    export function oneOf<A, B, C>(
+        parserA: Parser<A>,
+        parserB: Parser<B>,
+        parserC: Parser<C>,
+    ): Parser<A | B | C>;
+    export function oneOf<A, B, C, D>(
+        parserA: Parser<A>,
+        parserB: Parser<B>,
+        parserC: Parser<C>,
+        parserD: Parser<D>,
+    ): Parser<A | B | C | D>;
+    export function oneOf<A, B, C, D, E>(
+        parserA: Parser<A>,
+        parserB: Parser<B>,
+        parserC: Parser<C>,
+        parserD: Parser<D>,
+        parserE: Parser<E>,
+    ): Parser<A | B | C | D | E>;
+    export function oneOf<A, B, C, D, E, F>(
+        parserA: Parser<A>,
+        parserB: Parser<B>,
+        parserC: Parser<C>,
+        parserD: Parser<D>,
+        parserE: Parser<E>,
+        parserF: Parser<F>,
+    ): Parser<A | B | C | D | E | F>;
+    export function oneOf<A, B, C, D, E, F, G>(
+        parserA: Parser<A>,
+        parserB: Parser<B>,
+        parserC: Parser<C>,
+        parserD: Parser<D>,
+        parserE: Parser<E>,
+        parserF: Parser<F>,
+        parserG: Parser<G>,
+    ): Parser<A | B | C | D | E | F | G>;
+    export function oneOf<A, B, C, D, E, F, G, H>(
+        parserA: Parser<A>,
+        parserB: Parser<B>,
+        parserC: Parser<C>,
+        parserD: Parser<D>,
+        parserE: Parser<E>,
+        parserF: Parser<F>,
+        parserG: Parser<G>,
+        parserH: Parser<H>,
+    ): Parser<A | B | C | D | E | F | G | H>;
+    export function oneOf<A, B, C, D, E, F, G, H, I>(
+        parserA: Parser<A>,
+        parserB: Parser<B>,
+        parserC: Parser<C>,
+        parserD: Parser<D>,
+        parserE: Parser<E>,
+        parserF: Parser<F>,
+        parserG: Parser<G>,
+        parserH: Parser<H>,
+        parserI: Parser<I>,
+    ): Parser<A | B | C | D | E | F | G | H | I>;
+    export function oneOf<A, B, C, D, E, F, G, H, I, J>(
+        parserA: Parser<A>,
+        parserB: Parser<B>,
+        parserC: Parser<C>,
+        parserD: Parser<D>,
+        parserE: Parser<E>,
+        parserF: Parser<F>,
+        parserG: Parser<G>,
+        parserH: Parser<H>,
+        parserI: Parser<I>,
+        parserJ: Parser<J>,
+    ): Parser<A | B | C | D | E | F | G | H | I | J>;
+    export function oneOf<T>(...parsers: Parser<T>[]): Parser<T>;
     /**
      * Accepts a list of parsers and attempts to match them one at a time, in order.
      *
@@ -428,8 +502,8 @@ export namespace Parser {
      *
      * @param parsers The list of parsers to use
      */
-    export const oneOf = <T>(...parsers: Parser<T>[]): Parser<T> =>
-        Parser((source: string, index: number = 0) => {
+    export function oneOf<T>(...parsers: Parser<T>[]): Parser<T> {
+        return Parser((source: string, index: number = 0) => {
             let result: ParseResult<T> | null = null;
             for (let i = 0; i < parsers.length; i++) {
                 const parser = parsers[i];
@@ -443,6 +517,7 @@ export namespace Parser {
             }
             return result ?? ParseError("No parsers provided");
         });
+    }
 
     /**
      * Takes the output of a parser and transforms it based on the given function.
@@ -480,7 +555,7 @@ export namespace Parser {
      * @param parser The parser to attempt
      */
     export const maybe = <T>(parser: Parser<T>): Parser<Maybe<T>> =>
-        oneOf<Maybe<T>>(map(Maybe.Just, parser), succeed(Maybe.Nothing()));
+        oneOf(map(Maybe.Just, parser), succeed(Maybe.Nothing()));
 
     /**
      * A parser which only runs a given parser when requested

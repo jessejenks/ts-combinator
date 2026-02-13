@@ -275,7 +275,7 @@ describe("parses right-recursive arithmetic language to typed AST", () => {
         ),
     );
 
-    const factorParser: Parser<Int | Expr> = oneOf<Int | Expr>(
+    const factorParser: Parser<Int | Expr> = oneOf<Int, Expr>(
         map(Int, int()),
         map(
             ([, , expr]) => Expr(expr),

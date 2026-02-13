@@ -4,7 +4,6 @@ import { Parser } from "../src/Parser";
 const {
     integerPart,
     alphaNum,
-    map,
     oneOf,
     exact,
     pratt,
@@ -218,43 +217,32 @@ describe("Pratt parser features", () => {
 });
 
 describe("Pratt parser type features", () => {
-    type MyInfix = "and" | "or";
-    type MyPrefix = "not";
     const left = alphaNum();
     const infix = oneOf(
-        toBinaryOperator(
-            map<string, MyInfix>(() => "or", exact("or")),
-            [1, 2],
-        ),
-        toBinaryOperator(
-            map<string, MyInfix>(() => "and", exact("and")),
-            [3, 4],
-        ),
+        toBinaryOperator(exact("or"), [1, 2]),
+        toBinaryOperator(exact("and"), [3, 4]),
     );
-    const prefix = toUnaryOperator(
-        map<string, MyPrefix>(() => "not", exact("not")),
-        5,
-    );
+    const prefix = toUnaryOperator(exact("not"), 5);
     const scopeBegin = exact("(");
     const scopeEnd = exact(")");
 
     type AstNode =
         | string
         | {
-              symbol: MyInfix;
+              symbol: "or" | "and";
               left: AstNode;
               right: AstNode;
           }
         | {
-              symbol: MyPrefix;
+              symbol: "not";
               right: AstNode;
           };
 
     describe("As typed AST nodes", () => {
-        const exprParser = pratt<string, AstNode, MyInfix, MyPrefix>(left, {
+        const exprParser = pratt(left, {
             infix: {
                 op: infix,
-                acc: (symbol, left, right) => ({
+                acc: (symbol, left, right): AstNode => ({
                     symbol,
                     left,
                     right,

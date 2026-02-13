@@ -1,6 +1,6 @@
 import { Maybe } from "./Maybe";
 import { Result } from "./Result";
-import { Parser } from "./Parser";
+import { Parser, ParseResult } from "./Parser";
 
 describe("Individual Parser functions", () => {
     describe("exact", () => {
@@ -835,7 +835,7 @@ describe("Individual Parser functions", () => {
 
         it("matches on the first parser to match", () => {
             let source = "longer matches";
-            let result = oneOf(
+            let result: ParseResult<string> = oneOf(
                 Parser.exact("longer"),
                 Parser.exact("long"),
             ).parse(source);
