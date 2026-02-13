@@ -759,7 +759,7 @@ export namespace Parser {
         Prefix = string,
         Postfix = string,
     > = {
-        infix: {
+        infix?: {
             op: Parser<BinaryOperator<Infix>>;
             acc: (symbol: Infix, left: Acc | T, right: Acc | T) => Acc;
         };
@@ -890,6 +890,10 @@ export namespace Parser {
                             : scope.scopeEnd.parse(source, index);
 
                     if (Result.isOk(scopeEndResult)) {
+                        break;
+                    }
+
+                    if (infix === undefined) {
                         break;
                     }
 

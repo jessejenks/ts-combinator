@@ -13,18 +13,147 @@ const {
 } = Parser;
 
 describe("Pratt parser features", () => {
-    const left = integerPart();
-    const infix = oneOf(
-        toBinaryOperator(exact("-"), [1, 2]),
-        toBinaryOperator(exact("/"), [3, 4]),
-    );
-    const prefix = toUnaryOperator(exact("+"), 5);
-    const postfix = toUnaryOperator(exact("!"), 7);
-    const scopeBegin = exact("{");
-    const scopeEnd = exact("}");
+    describe("trivial parser", () => {
+        const trivial = pratt(exact("hello"), {});
+        test("trivial", () => {
+            const result = trivial.parse("hello world");
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    expect(result.value.parsed).toBe("hello");
+                    break;
+
+                case Result.Variant.Err:
+                    fail(result.error);
+            }
+        });
+    });
+
+    describe("prefix only parser", () => {
+        const left = integerPart();
+        const prefix = toUnaryOperator(exact("+"), 1);
+
+        const prefixParser = pratt(left, {
+            prefix: {
+                op: prefix,
+                acc: (symbol, right) => `(${symbol} ${right})`,
+            },
+        });
+
+        const okCases: Array<[string, string]> = [
+            ["123", "123"],
+            ["+123", "(+ 123)"],
+            ["+   123", "(+ 123)"],
+            ["+++123", "(+ (+ (+ 123)))"],
+        ];
+
+        test.each(okCases)(
+            "parses '%s' as the string '%s'",
+            (source, expectedValue) => {
+                const result = prefixParser.parse(source);
+                switch (result.variant) {
+                    case Result.Variant.Ok:
+                        expect(result.value.parsed).toBe(expectedValue);
+                        break;
+
+                    case Result.Variant.Err:
+                        fail(result.error);
+                }
+            },
+        );
+    });
+
+    describe("postfix only parser", () => {
+        const left = integerPart();
+        const postfix = toUnaryOperator(exact("!"), 1);
+
+        const postfixParser = pratt(left, {
+            postfix: {
+                op: postfix,
+                acc: (symbol, right) => `(${symbol} ${right})`,
+            },
+        });
+
+        const okCases: Array<[string, string]> = [
+            ["123", "123"],
+            ["123!", "(! 123)"],
+            ["123   !", "(! 123)"],
+            ["123!!!", "(! (! (! 123)))"],
+        ];
+
+        test.each(okCases)(
+            "parses '%s' as the string '%s'",
+            (source, expectedValue) => {
+                const result = postfixParser.parse(source);
+                switch (result.variant) {
+                    case Result.Variant.Ok:
+                        expect(result.value.parsed).toBe(expectedValue);
+                        break;
+
+                    case Result.Variant.Err:
+                        fail(result.error);
+                }
+            },
+        );
+    });
+
+    describe("prefix/postfix/scope parser", () => {
+        const left = integerPart();
+        const prefix = toUnaryOperator(exact("+"), 5);
+        const postfix = toUnaryOperator(exact("!"), 7);
+        const scopeBegin = exact("(");
+        const scopeEnd = exact(")");
+
+        const postfixParser = pratt(left, {
+            prefix: {
+                op: prefix,
+                acc: (symbol, right) => `(${symbol} ${right})`,
+            },
+            postfix: {
+                op: postfix,
+                acc: (symbol, right) => `(${symbol} ${right})`,
+            },
+            scope: {
+                scopeBegin,
+                scopeEnd,
+            },
+        });
+
+        const okCases: Array<[string, string]> = [
+            ["123", "123"],
+            ["+123", "(+ 123)"],
+            ["+123!", "(+ (! 123))"],
+            ["++123!!", "(+ (+ (! (! 123))))"],
+            ["+(+123)!!", "(+ (! (! (+ 123))))"],
+        ];
+
+        test.each(okCases)(
+            "parses '%s' as the string '%s'",
+            (source, expectedValue) => {
+                const result = postfixParser.parse(source);
+                switch (result.variant) {
+                    case Result.Variant.Ok:
+                        expect(result.value.parsed).toBe(expectedValue);
+                        break;
+
+                    case Result.Variant.Err:
+                        fail(result.error);
+                }
+            },
+        );
+    });
 
     describe("as S Expressions", () => {
-        const exprParser = pratt<string>(left, {
+        const left = integerPart();
+        const infix = oneOf(
+            toBinaryOperator(exact("-"), [1, 2]),
+            toBinaryOperator(exact("/"), [3, 4]),
+        );
+        const prefix = toUnaryOperator(exact("+"), 5);
+        const postfix = toUnaryOperator(exact("!"), 7);
+        const scopeBegin = exact("{");
+        const scopeEnd = exact("}");
+
+        const exprParser = pratt(left, {
             infix: {
                 op: infix,
                 acc: (symbol, left, right) => `(${symbol} ${left} ${right})`,
