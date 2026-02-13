@@ -41,7 +41,7 @@ describe("simple comparison with oneOf and sequence", () => {
                 break;
 
             case Result.Variant.Ok:
-                fail("Should not have parsed");
+                throw new Error("Should not have parsed");
         }
     });
 
@@ -74,7 +74,7 @@ describe("simple comparison with oneOf and sequence", () => {
                     break;
 
                 case Result.Variant.Ok:
-                    fail("Should not have parsed");
+                    throw new Error("Should not have parsed");
             }
         },
     );
@@ -130,7 +130,7 @@ describe("date parser", () => {
                 break;
 
             case Result.Variant.Err:
-                fail(result.error);
+                throw new Error(result.error.message);
         }
     });
 
@@ -153,7 +153,7 @@ describe("date parser", () => {
                 break;
 
             case Result.Variant.Ok:
-                fail("Should not have parsed");
+                throw new Error("Should not have parsed");
         }
     });
 
@@ -197,7 +197,7 @@ describe("date parser", () => {
                 break;
 
             case Result.Variant.Err:
-                fail(result.error);
+                throw new Error(result.error.message);
         }
     });
 
@@ -211,7 +211,7 @@ describe("date parser", () => {
                     break;
 
                 case Result.Variant.Ok:
-                    fail("Should not have parsed");
+                    throw new Error("Should not have parsed");
             }
         },
     );
@@ -238,7 +238,7 @@ describe("with zeroOrMore and oneOrMore", () => {
                 break;
 
             case Result.Variant.Err:
-                fail("Should not have parsed");
+                throw new Error("Should not have parsed");
         }
 
         result = zeroOrMoreParser.parse(source);
@@ -248,7 +248,7 @@ describe("with zeroOrMore and oneOrMore", () => {
                 break;
 
             case Result.Variant.Err:
-                fail(result.error.message);
+                throw new Error(result.error.message);
         }
     });
 
@@ -280,7 +280,7 @@ describe("with zeroOrMore and oneOrMore", () => {
                     break;
 
                 case Result.Variant.Ok:
-                    fail("Should not have parsed");
+                    throw new Error("Should not have parsed");
             }
 
             result = conditionalZeroOrMoreParser.parse(source);
@@ -290,7 +290,7 @@ describe("with zeroOrMore and oneOrMore", () => {
                     break;
 
                 case Result.Variant.Ok:
-                    fail("Should not have parsed");
+                    throw new Error("Should not have parsed");
             }
         },
     );

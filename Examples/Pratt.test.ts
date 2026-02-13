@@ -22,7 +22,7 @@ describe("Pratt parser features", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
         });
     });
@@ -55,7 +55,7 @@ describe("Pratt parser features", () => {
                         break;
 
                     case Result.Variant.Err:
-                        fail(result.error);
+                        throw new Error(result.error.message);
                 }
             },
         );
@@ -89,7 +89,7 @@ describe("Pratt parser features", () => {
                         break;
 
                     case Result.Variant.Err:
-                        fail(result.error);
+                        throw new Error(result.error.message);
                 }
             },
         );
@@ -135,7 +135,7 @@ describe("Pratt parser features", () => {
                         break;
 
                     case Result.Variant.Err:
-                        fail(result.error);
+                        throw new Error(result.error.message);
                 }
             },
         );
@@ -209,7 +209,7 @@ describe("Pratt parser features", () => {
                         break;
 
                     case Result.Variant.Err:
-                        fail(result.error);
+                        throw new Error(result.error.message);
                 }
             },
         );
@@ -352,14 +352,14 @@ describe("Pratt parser type features", () => {
         ];
 
         test.each(okCases)("parses '%s'", (source, expectedValue) => {
-            let result = exprParser.parse(source);
+            const result = exprParser.parse(source);
             switch (result.variant) {
                 case Result.Variant.Ok:
                     expect(result.value.parsed).toEqual(expectedValue);
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
         });
 
@@ -384,7 +384,7 @@ describe("Pratt parser type features", () => {
                     break;
 
                 case Result.Variant.Ok:
-                    fail("Should not have parsed");
+                    expect(result.variant).toBe(Result.Variant.Err);
             }
         });
     });

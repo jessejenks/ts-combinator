@@ -16,7 +16,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
         });
 
@@ -38,7 +38,7 @@ describe("Individual Parser functions", () => {
                         break;
 
                     case Result.Variant.Ok:
-                        fail("Should not have parsed");
+                        throw new Error("Should not have parsed");
                 }
             },
         );
@@ -61,7 +61,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
         });
     });
@@ -81,7 +81,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Ok:
-                    fail("Should not have parsed");
+                    throw new Error("Should not have parsed");
             }
         });
     });
@@ -108,7 +108,7 @@ describe("Individual Parser functions", () => {
                         break;
 
                     case Result.Variant.Err:
-                        fail(result.error);
+                        throw new Error(result.error.message);
                 }
             },
         );
@@ -156,7 +156,7 @@ describe("Individual Parser functions", () => {
                             break;
 
                         case Result.Variant.Err:
-                            fail(result.error);
+                            throw new Error(result.error.message);
                     }
 
                     result = multipleParser.parse(source);
@@ -168,7 +168,7 @@ describe("Individual Parser functions", () => {
                             break;
 
                         case Result.Variant.Err:
-                            fail(result.error);
+                            throw new Error(result.error.message);
                     }
                 },
             );
@@ -183,7 +183,7 @@ describe("Individual Parser functions", () => {
                             break;
 
                         case Result.Variant.Ok:
-                            fail("Should not have parsed");
+                            throw new Error("Should not have parsed");
                     }
 
                     result = multipleParser.parse(source);
@@ -193,7 +193,7 @@ describe("Individual Parser functions", () => {
                             break;
 
                         case Result.Variant.Ok:
-                            fail("Should not have parsed");
+                            throw new Error("Should not have parsed");
                     }
                 },
             );
@@ -374,7 +374,7 @@ describe("Individual Parser functions", () => {
                             break;
 
                         case Result.Variant.Err:
-                            fail(result.error);
+                            throw new Error(result.error.message);
                     }
                 },
             );
@@ -393,7 +393,7 @@ describe("Individual Parser functions", () => {
                             break;
 
                         case Result.Variant.Err:
-                            fail(result.error);
+                            throw new Error(result.error.message);
                     }
                 },
             );
@@ -425,7 +425,7 @@ describe("Individual Parser functions", () => {
                             break;
 
                         case Result.Variant.Ok:
-                            fail("Should not have parsed");
+                            throw new Error("Should not have parsed");
                     }
                 },
             );
@@ -441,7 +441,7 @@ describe("Individual Parser functions", () => {
                             break;
 
                         case Result.Variant.Ok:
-                            fail("Should not have parsed");
+                            throw new Error("Should not have parsed");
                     }
                 },
             );
@@ -460,7 +460,7 @@ describe("Individual Parser functions", () => {
                         break;
 
                     case Result.Variant.Err:
-                        fail(result.error);
+                        throw new Error(result.error.message);
                 }
 
                 result = int().parse("123.1415 hello");
@@ -472,7 +472,7 @@ describe("Individual Parser functions", () => {
                         break;
 
                     case Result.Variant.Ok:
-                        fail("Should not have parsed");
+                        throw new Error("Should not have parsed");
                 }
             });
         });
@@ -492,7 +492,7 @@ describe("Individual Parser functions", () => {
                         break;
 
                     case Result.Variant.Err:
-                        fail(result.error);
+                        throw new Error(result.error.message);
                 }
             });
         });
@@ -515,7 +515,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
         });
 
@@ -536,7 +536,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Ok:
-                    fail("Should not have parsed");
+                    throw new Error("Should not have parsed");
             }
         });
     });
@@ -560,7 +560,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail("Should not have parsed");
+                    throw new Error("Should not have parsed");
             }
 
             result = conditionalParser.parse("ab");
@@ -570,7 +570,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail("Should not have parsed");
+                    throw new Error("Should not have parsed");
             }
         });
 
@@ -582,12 +582,12 @@ describe("Individual Parser functions", () => {
             const conditionalResult = conditionalParser.parse(source);
 
             if (Result.isOk(sequenceResult)) {
-                fail("Should not have parsed");
+                throw new Error("Should not have parsed");
             }
 
             if (Result.isOk(conditionalResult)) {
                 console.log(conditionalResult);
-                fail("Should not have parsed");
+                throw new Error("Should not have parsed");
             }
 
             expect(conditionalResult.error.message).toBe(
@@ -620,7 +620,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Ok:
-                    fail("Should not have parsed");
+                    throw new Error("Should not have parsed");
             }
 
             result = outerParser.parse("<a>");
@@ -630,7 +630,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error.message);
+                    throw new Error(result.error.message);
             }
         });
     });
@@ -663,7 +663,7 @@ describe("Individual Parser functions", () => {
                         break;
 
                     case Result.Variant.Err:
-                        fail(result.error);
+                        throw new Error(result.error.message);
                 }
             },
         );
@@ -696,7 +696,7 @@ describe("Individual Parser functions", () => {
                         break;
 
                     case Result.Variant.Err:
-                        fail(result.error);
+                        throw new Error(result.error.message);
                 }
             },
         );
@@ -720,7 +720,7 @@ describe("Individual Parser functions", () => {
                         break;
 
                     case Result.Variant.Ok:
-                        fail("Should not have parsed");
+                        throw new Error("Should not have parsed");
                 }
             },
         );
@@ -738,7 +738,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Ok:
-                    fail("Should not have parsed");
+                    throw new Error("Should not have parsed");
             }
         });
 
@@ -754,7 +754,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
 
             source = "bcd";
@@ -768,7 +768,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Ok:
-                    fail("Should not have parsed");
+                    throw new Error("Should not have parsed");
             }
         });
 
@@ -789,7 +789,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
 
             source = "bca";
@@ -802,7 +802,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
 
             source = "cab";
@@ -815,7 +815,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
 
             source = "f";
@@ -829,7 +829,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Ok:
-                    fail("Should not have parsed");
+                    throw new Error("Should not have parsed");
             }
         });
 
@@ -847,7 +847,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
 
             source = "shorter matches";
@@ -863,7 +863,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
         });
     });
@@ -884,7 +884,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
         });
 
@@ -905,7 +905,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
         });
 
@@ -927,7 +927,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
         });
     });
@@ -945,7 +945,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
         });
 
@@ -983,7 +983,7 @@ describe("Individual Parser functions", () => {
                         break;
 
                     case Result.Variant.Err:
-                        fail(result.error);
+                        throw new Error(result.error.message);
                 }
             });
 
@@ -1012,7 +1012,7 @@ describe("Individual Parser functions", () => {
                             break;
 
                         case Result.Variant.Ok:
-                            fail("Should not have parsed");
+                            throw new Error("Should not have parsed");
                     }
                 },
             );
@@ -1027,13 +1027,13 @@ describe("Individual Parser functions", () => {
             switch (result.variant) {
                 case Result.Variant.Ok:
                     if (Maybe.isJust(result.value.parsed)) {
-                        fail("Should not have parsed");
+                        throw new Error("Should not have parsed");
                     }
                     expect(Maybe.isNothing(result.value.parsed));
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
         });
 
@@ -1078,7 +1078,7 @@ describe("Individual Parser functions", () => {
                             break;
 
                         case Result.Variant.Err:
-                            fail(result.error);
+                            throw new Error(result.error.message);
                     }
                 },
             );
@@ -1116,7 +1116,7 @@ describe("Individual Parser functions", () => {
                         break;
 
                     case Result.Variant.Err:
-                        fail(result.error);
+                        throw new Error(result.error.message);
                 }
             });
 
@@ -1136,7 +1136,7 @@ describe("Individual Parser functions", () => {
                         break;
 
                     case Result.Variant.Ok:
-                        fail("Should not have parsed");
+                        throw new Error("Should not have parsed");
                 }
             });
         });
@@ -1155,7 +1155,7 @@ describe("Individual Parser functions", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
         });
 
@@ -1176,7 +1176,7 @@ describe("Individual Parser functions", () => {
                         break;
 
                     case Result.Variant.Ok:
-                        fail("Should not have parsed");
+                        throw new Error("Should not have parsed");
                 }
             },
         );

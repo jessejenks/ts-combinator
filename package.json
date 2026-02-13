@@ -23,6 +23,7 @@
     ],
     "scripts": {
         "test": "jest --watchAll",
+        "test:ci": "jest",
         "build:js": "rollup --config",
         "build:types": "tsc --project ./ --emitDeclarationOnly",
         "build": "npm run build:types && npm run build:js",

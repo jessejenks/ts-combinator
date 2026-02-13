@@ -51,7 +51,7 @@ describe("parses canonical context free grammar of balanced parentheses", () => 
                 break;
 
             case Result.Variant.Err:
-                fail(result.error);
+                throw new Error(result.error.message);
         }
     });
 });
@@ -154,7 +154,7 @@ describe("parses and interprets right-recursive arithmetic language", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
         },
     );
@@ -316,7 +316,7 @@ describe("parses right-recursive arithmetic language to typed AST", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
         },
     );

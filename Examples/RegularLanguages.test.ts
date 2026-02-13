@@ -38,7 +38,7 @@ describe("simple regular expression /a(b|c)d*/", () => {
                 break;
 
             case Result.Variant.Err:
-                fail(result.error);
+                throw new Error(result.error.message);
         }
     });
 
@@ -62,7 +62,7 @@ describe("simple regular expression /a(b|c)d*/", () => {
 
             case Result.Variant.Ok:
                 console.log(result);
-                fail("Should not have parsed");
+                throw new Error("Should not have parsed");
         }
     });
 });
@@ -119,7 +119,7 @@ describe("date parser", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
         },
     );
@@ -152,7 +152,7 @@ describe("date parser", () => {
                 break;
 
             case Result.Variant.Err:
-                fail(result.error);
+                throw new Error(result.error.message);
         }
     });
 
@@ -176,7 +176,7 @@ describe("date parser", () => {
 
             case Result.Variant.Ok:
                 console.log(result);
-                fail("Should not have parsed");
+                throw new Error("Should not have parsed");
         }
     });
 });
@@ -250,7 +250,7 @@ describe("simple regular expression for phone numbers", () => {
                 break;
 
             case Result.Variant.Err:
-                fail(result.error);
+                throw new Error(result.error.message);
         }
     });
 
@@ -264,7 +264,7 @@ describe("simple regular expression for phone numbers", () => {
 
             case Result.Variant.Ok:
                 console.log(result);
-                fail("Should not have parsed");
+                throw new Error("Should not have parsed");
         }
     });
 });

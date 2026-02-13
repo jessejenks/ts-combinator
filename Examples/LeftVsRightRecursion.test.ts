@@ -95,7 +95,7 @@ describe("Right Recursive", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
         },
     );
@@ -132,7 +132,7 @@ describe("Right Recursive Pratt", () => {
                         break;
 
                     case Result.Variant.Err:
-                        fail(result.error);
+                        throw new Error(result.error.message);
                 }
             },
         );
@@ -161,7 +161,7 @@ describe("Right Recursive Pratt", () => {
                         break;
 
                     case Result.Variant.Err:
-                        fail(result.error);
+                        throw new Error(result.error.message);
                 }
             },
         );
@@ -199,7 +199,7 @@ describe("Left Recursive Pratt", () => {
                         break;
 
                     case Result.Variant.Err:
-                        fail(result.error);
+                        throw new Error(result.error.message);
                 }
             },
         );
@@ -228,7 +228,7 @@ describe("Left Recursive Pratt", () => {
                         break;
 
                     case Result.Variant.Err:
-                        fail(result.error);
+                        throw new Error(result.error.message);
                 }
             },
         );

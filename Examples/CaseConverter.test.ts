@@ -27,7 +27,7 @@ describe("parses string casing", () => {
                     break;
 
                 default:
-                    fail(result.error);
+                    throw new Error(result.error.message);
             }
         },
     );
@@ -93,7 +93,7 @@ describe("parses string casing", () => {
                     break;
 
                 case Result.Variant.Err:
-                    fail(result.error);
+                    throw new Error(result.error);
             }
         },
     );
