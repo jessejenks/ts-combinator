@@ -340,10 +340,8 @@ describe("Pratt parser type features", () => {
                 "not (nice and cool)",
                 {
                     symbol: "not",
-
                     right: {
                         symbol: "and",
-
                         left: "nice",
                         right: "cool",
                     },
@@ -363,6 +361,43 @@ describe("Pratt parser type features", () => {
             }
         });
 
+        const partialCases: Array<[string, AstNode, string]> = [
+            [
+                "not nice (and) cool",
+                {
+                    symbol: "not",
+                    right: "nice",
+                },
+                " (and) cool",
+            ],
+            [
+                "not nice (and cool)",
+                {
+                    symbol: "not",
+                    right: "nice",
+                },
+                " (and cool)",
+            ],
+        ];
+
+        test.each(partialCases)(
+            "partially parses '%s'",
+            (source, expectedValue, remaining) => {
+                const result = exprParser.parse(source);
+                switch (result.variant) {
+                    case Result.Variant.Ok:
+                        expect(result.value.parsed).toEqual(expectedValue);
+                        expect(
+                            result.value.source.slice(result.value.index),
+                        ).toEqual(remaining);
+                        break;
+
+                    case Result.Variant.Err:
+                        throw new Error(result.error.message);
+                }
+            },
+        );
+
         const errCases: Array<[string, string]> = [
             [
                 "(not) nice and cool",
@@ -372,8 +407,6 @@ describe("Pratt parser type features", () => {
                 "not (nice and) cool",
                 'Expected alpha numeric characters but got ")" instead',
             ],
-            ["not nice (and) cool", 'Expected "and" but got'],
-            ["not nice (and cool)", 'Expected "and" but got'],
         ];
 
         test.each(errCases)("does not parse '%s'", (source, expectedValue) => {

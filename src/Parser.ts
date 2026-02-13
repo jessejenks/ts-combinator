@@ -972,7 +972,7 @@ export namespace Parser {
 
                     const op = infix.op.parse(source, index);
                     if (Result.isErr(op)) {
-                        return op;
+                        break;
                     }
                     const {
                         parsed: { symbol, bindingPower },
