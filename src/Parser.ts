@@ -312,7 +312,13 @@ export namespace Parser {
     export const string = (): Parser<string> =>
         fromRegExp(/("[^"]*"|'[^']*')/, "a string");
 
-    const fromRegExp = (re: RegExp, expected: string) =>
+    /**
+     * Constructs a combinator from a regular expression.
+     * NOTE: Always inserts a `^` symbol before the pattern.
+     * @param re the regular expression to match against
+     * @param expected a name or description of the pattern for error messages
+     */
+    export const fromRegExp = (re: RegExp, expected: string) =>
         Parser<string>((source: string, index: number = 0) => {
             const match = new RegExp(`^${re.source}`).exec(source.slice(index));
             if (match === null) {
