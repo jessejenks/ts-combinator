@@ -305,6 +305,13 @@ export namespace Parser {
             }
         });
 
+    /**
+     * Parses a basic quoted string, either double or single quotes.
+     * Does not have any handling for escape sequences.
+     */
+    export const string = (): Parser<string> =>
+        fromRegExp(/("[^"]*"|'[^']*')/, "a string");
+
     const fromRegExp = (re: RegExp, expected: string) =>
         Parser<string>((source: string, index: number = 0) => {
             const match = new RegExp(`^${re.source}`).exec(source.slice(index));

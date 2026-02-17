@@ -498,6 +498,22 @@ describe("Individual Parser functions", () => {
         });
     });
 
+    describe("string", () => {
+        const { string } = Parser;
+        const cases = ['""', '"string value"', "''", "'string value'"];
+        test.each(cases)("Parses the string %s", (source) => {
+            const result = string().parse(source);
+
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    break;
+
+                case Result.Variant.Err:
+                    throw new Error(result.error.message);
+            }
+        });
+    });
+
     describe("sequence", () => {
         const { sequence } = Parser;
 
