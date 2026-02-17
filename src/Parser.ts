@@ -607,176 +607,17 @@ export namespace Parser {
     /**
      * Accepts a list of parsers and succeeds only if they all succeed.
      *
-     * @param parserA The parser to try first
-     * @param parserB The parser to try second
-     */
-    export function sequence<A, B>(
-        parserA: Parser<A>,
-        parserB: Parser<B>,
-    ): Parser<[A, B]>;
-    /**
-     * Accepts a list of parsers and succeeds only if they all succeed.
-     *
-     * @param parserA The parser to try first
-     * @param parserB The parser to try second
-     * @param parserC The parser to try third
-     */
-    export function sequence<A, B, C>(
-        parserA: Parser<A>,
-        parserB: Parser<B>,
-        parserC: Parser<C>,
-    ): Parser<[A, B, C]>;
-    /**
-     * Accepts a list of parsers and succeeds only if they all succeed.
-     *
-     * @param parserA The parser to try first
-     * @param parserB The parser to try second
-     * @param parserC The parser to try third
-     * @param parserD The parser to try fourth
-     */
-    export function sequence<A, B, C, D>(
-        parserA: Parser<A>,
-        parserB: Parser<B>,
-        parserC: Parser<C>,
-        parserD: Parser<D>,
-    ): Parser<[A, B, C, D]>;
-    /**
-     * Accepts a list of parsers and succeeds only if they all succeed.
-     *
-     * @param parserA The parser to try first
-     * @param parserB The parser to try second
-     * @param parserC The parser to try third
-     * @param parserD The parser to try fourth
-     * @param parserE The parser to try fifth
-     */
-    export function sequence<A, B, C, D, E>(
-        parserA: Parser<A>,
-        parserB: Parser<B>,
-        parserC: Parser<C>,
-        parserD: Parser<D>,
-        parserE: Parser<E>,
-    ): Parser<[A, B, C, D, E]>;
-    /**
-     * Accepts a list of parsers and succeeds only if they all succeed.
-     *
-     * @param parserA The parser to try first
-     * @param parserB The parser to try second
-     * @param parserC The parser to try third
-     * @param parserD The parser to try fourth
-     * @param parserE The parser to try fifth
-     * @param parserF The parser to try sixth
-     */
-    export function sequence<A, B, C, D, E, F>(
-        parserA: Parser<A>,
-        parserB: Parser<B>,
-        parserC: Parser<C>,
-        parserD: Parser<D>,
-        parserE: Parser<E>,
-        parserF: Parser<F>,
-    ): Parser<[A, B, C, D, E, F]>;
-    /**
-     * Accepts a list of parsers and succeeds only if they all succeed.
-     *
-     * @param parserA The parser to try first
-     * @param parserB The parser to try second
-     * @param parserC The parser to try third
-     * @param parserD The parser to try fourth
-     * @param parserE The parser to try fifth
-     * @param parserF The parser to try sixth
-     * @param parserG The parser to try seventh
-     */
-    export function sequence<A, B, C, D, E, F, G>(
-        parserA: Parser<A>,
-        parserB: Parser<B>,
-        parserC: Parser<C>,
-        parserD: Parser<D>,
-        parserE: Parser<E>,
-        parserF: Parser<F>,
-        parserG: Parser<G>,
-    ): Parser<[A, B, C, D, E, F, G]>;
-    /**
-     * Accepts a list of parsers and succeeds only if they all succeed.
-     *
-     * @param parserA The parser to try first
-     * @param parserB The parser to try second
-     * @param parserC The parser to try third
-     * @param parserD The parser to try fourth
-     * @param parserE The parser to try fifth
-     * @param parserF The parser to try sixth
-     * @param parserG The parser to try seventh
-     * @param parserH The parser to try eigth
-     */
-    export function sequence<A, B, C, D, E, F, G, H>(
-        parserA: Parser<A>,
-        parserB: Parser<B>,
-        parserC: Parser<C>,
-        parserD: Parser<D>,
-        parserE: Parser<E>,
-        parserF: Parser<F>,
-        parserG: Parser<G>,
-        parserH: Parser<H>,
-    ): Parser<[A, B, C, D, E, F, G, H]>;
-    /**
-     * Accepts a list of parsers and succeeds only if they all succeed.
-     *
-     * @param parserA The parser to try first
-     * @param parserB The parser to try second
-     * @param parserC The parser to try third
-     * @param parserD The parser to try fourth
-     * @param parserE The parser to try fifth
-     * @param parserF The parser to try sixth
-     * @param parserG The parser to try seventh
-     * @param parserH The parser to try eigth
-     * @param parserI The parser to try ninth
-     */
-    export function sequence<A, B, C, D, E, F, G, H, I>(
-        parserA: Parser<A>,
-        parserB: Parser<B>,
-        parserC: Parser<C>,
-        parserD: Parser<D>,
-        parserE: Parser<E>,
-        parserF: Parser<F>,
-        parserG: Parser<G>,
-        parserH: Parser<H>,
-        parserI: Parser<I>,
-    ): Parser<[A, B, C, D, E, F, G, H, I]>;
-    /**
-     * Accepts a list of parsers and succeeds only if they all succeed.
-     *
-     * @param parserA The parser to try first
-     * @param parserB The parser to try second
-     * @param parserC The parser to try third
-     * @param parserD The parser to try fourth
-     * @param parserE The parser to try fifth
-     * @param parserF The parser to try sixth
-     * @param parserG The parser to try seventh
-     * @param parserH The parser to try eigth
-     * @param parserI The parser to try ninth
-     * @param parserJ The parser to try tenth
-     */
-    export function sequence<A, B, C, D, E, F, G, H, I, J>(
-        parserA: Parser<A>,
-        parserB: Parser<B>,
-        parserC: Parser<C>,
-        parserD: Parser<D>,
-        parserE: Parser<E>,
-        parserF: Parser<F>,
-        parserG: Parser<G>,
-        parserH: Parser<H>,
-        parserI: Parser<I>,
-        parserJ: Parser<J>,
-    ): Parser<[A, B, C, D, E, F, G, H, I, J]>;
-
-    /**
-     * Accepts a list of parsers and succeeds only if they all succeed.
-     *
      * General case
      * @param parsers The sequence of parsers to attempt
      */
-    export function sequence<T>(...parsers: Parser<T>[]): Parser<T[]> {
-        return Parser((source: string, index: number = 0) => {
-            const values: T[] = new Array(parsers.length);
-            let result: ParseResult<T>;
+    export const sequence = <T extends unknown[]>(
+        ...parsers: { [K in keyof T]: Parser<T[K]> }
+    ): Parser<T> =>
+        Parser((source: string, index: number = 0) => {
+            const values = new Array(parsers.length) as {
+                [K in keyof T]: T[K];
+            };
+            let result: ParseResult<T[number]>;
             for (let i = 0; i < parsers.length; i++) {
                 result = parsers[i].parse(source, index);
                 switch (result.variant) {
@@ -791,7 +632,6 @@ export namespace Parser {
             }
             return ParseSuccess(values, index, source);
         });
-    }
 
     export type UnaryOperator<T = string> = {
         symbol: T;
