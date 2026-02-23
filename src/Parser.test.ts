@@ -89,17 +89,19 @@ describe("Individual Parser functions", () => {
     describe("spaces", () => {
         const { spaces } = Parser;
 
-        const cases: Array<[string, string]> = [
-            ["0 spaces", "0 spaces"],
-            [" 1 space", "1 space"],
-            ["   4 spaces", "4 spaces"],
-            [" \t\n\rother whitespace", "other whitespace"],
+        const cases: Array<[string, string, boolean]> = [
+            ["0 spaces", "0 spaces", false],
+            [" 1 space", "1 space", false],
+            [" 1 required space", "1 required space", true],
+            ["   4 spaces", "4 spaces", false],
+            ["   4 required spaces", "4 required spaces", true],
+            [" \t\n\rother whitespace", "other whitespace", false],
         ];
 
         test.each(cases)(
             "Matches zero or more whitespace characters",
-            (source, remaining) => {
-                const result = spaces().parse(source);
+            (source, remaining, required) => {
+                const result = spaces(required).parse(source);
                 switch (result.variant) {
                     case Result.Variant.Ok:
                         expect(source.slice(result.value.index)).toBe(
@@ -112,6 +114,20 @@ describe("Individual Parser functions", () => {
                 }
             },
         );
+
+        test("fails if spaces are required and none are found", () => {
+            const result = spaces(true).parse("0 spaces");
+            switch (result.variant) {
+                case Result.Variant.Err:
+                    expect(result.error.message).toBe(
+                        'Error at (line: 1, column: 1)\nExpected whitespace but got "0" instead\n\n0 spaces\n^',
+                    );
+                    break;
+
+                case Result.Variant.Ok:
+                    throw new Error("Should not have parsed");
+            }
+        });
     });
 
     describe("character classes", () => {
@@ -510,6 +526,67 @@ describe("Individual Parser functions", () => {
 
                 case Result.Variant.Err:
                     throw new Error(result.error.message);
+            }
+        });
+    });
+
+    describe("validate", () => {
+        const { validate } = Parser;
+        const keywordsPattern = /^(if|else|then|true|false)$/;
+        const identifierParser = Parser.fromRegExp(
+            /[a-zA-Z_][a-zA-Z0-9_]*/,
+            "identifier",
+        );
+
+        const cases: [string, boolean][] = [
+            ["true", true],
+            ["if", true],
+            ["iffy", false],
+        ];
+
+        test.each(cases)("Validates parsed value %s", (source, shouldFail) => {
+            const result = validate(
+                (ident) => !keywordsPattern.test(ident),
+                identifierParser,
+            ).parse(source);
+
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    if (shouldFail) {
+                        throw new Error("Should not have parsed");
+                    }
+                    break;
+
+                case Result.Variant.Err:
+                    if (shouldFail) {
+                        break;
+                    }
+                    throw new Error(result.error.message);
+            }
+        });
+
+        test("Validates and narrows type", () => {
+            const parser = validate(
+                (greeting): greeting is "hello" => greeting === "hello",
+                Parser.oneOf(Parser.exact("hello"), Parser.exact("goodbye")),
+            );
+
+            let result = parser.parse("hello");
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    break;
+
+                case Result.Variant.Err:
+                    throw new Error(result.error.message);
+            }
+
+            result = parser.parse("goodbye");
+            switch (result.variant) {
+                case Result.Variant.Err:
+                    break;
+
+                case Result.Variant.Ok:
+                    throw new Error("Should not have parsed");
             }
         });
     });

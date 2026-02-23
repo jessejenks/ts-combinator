@@ -186,7 +186,10 @@ export namespace Parser {
     /**
      * A parser for reading zero or more whitespace characters.
      */
-    export const spaces = (): Parser<string> => fromRegExp(/\s*/, "whitespace");
+    export const spaces = (required = false): Parser<string> =>
+        required
+            ? fromRegExp(/\s+/, "whitespace")
+            : fromRegExp(/\s*/, "whitespace");
 
     /**
      * A parser for reading a sequence of digits.
@@ -313,8 +316,48 @@ export namespace Parser {
         fromRegExp(/("[^"]*"|'[^']*')/, "a string");
 
     /**
+     * @param isValid checks for validity
+     * @param parser The parser whose output you want to check
+     * @example
+     * ```ts
+     * const keywordsPattern = /^(if|else|then|true|false)$/;
+     * const identifierParser = validate((ident) => !keywordsPattern.test(ident), fromRegExp(/[a-zA-Z_]+/, "identifier"));
+     * ```
+     */
+    export function validate<U, V extends U>(
+        isValid: (t: U) => t is V,
+        parser: Parser<U>,
+    ): Parser<V>;
+    export function validate<T>(
+        isValid: (t: T) => boolean,
+        parser: Parser<T>,
+    ): Parser<T>;
+    export function validate<T>(
+        isValid: (t: T) => boolean,
+        parser: Parser<T>,
+    ): Parser<T> {
+        return Parser((source: string, index: number = 0) => {
+            const result = parser.parse(source, index);
+            switch (result.variant) {
+                case Result.Variant.Ok:
+                    const value = result.value.parsed;
+                    if (isValid(value)) {
+                        return ParseSuccess(
+                            value,
+                            result.value.index,
+                            result.value.source,
+                        );
+                    }
+                    return ParseError(`invalid value ${result.value.parsed}`);
+                case Result.Variant.Err:
+                    return result;
+            }
+        });
+    }
+
+    /**
      * Constructs a combinator from a regular expression.
-     * NOTE: Always inserts a `^` symbol before the pattern.
+     * NOTE: Always inserts a `^` symbol before the pattern, and ignores flags.
      * @param re the regular expression to match against
      * @param expected a name or description of the pattern for error messages
      */
