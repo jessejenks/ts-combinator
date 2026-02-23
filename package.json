@@ -1,6 +1,6 @@
 {
     "name": "@jessejenks/ts-combinator",
-    "version": "3.2.0",
+    "version": "3.3.0",
     "type": "module",
     "description": "simple typescript combinator library",
     "main": "dist/index.js",
@@ -22,6 +22,7 @@
         "dist"
     ],
     "scripts": {
+        "prepare": "npm run build",
         "test": "jest --watchAll",
         "test:ci": "jest",
         "build:js": "rollup --config",
