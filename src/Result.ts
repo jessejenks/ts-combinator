@@ -51,54 +51,83 @@ export namespace Result {
             : Result.Ok(value);
 
     /**
-     * Takes the value from an Ok result and transforms it based on the given function.
-     * Acts like identity function in Err case
-     * @param f the function for mapping the output of the given result
+     * Eliminates a result, in the sense of introduction and elimination of a sum type.
+     * @param onOk how to map an Ok value to the output type
+     * @param onErr how to map an Err value to the output type
+     * @param result the result to eliminate
+     */
+    export const eliminate = <T, E, W>(
+        onOk: (t: T) => W,
+        onErr: (e: E) => W,
+        result: Result<T, E>,
+    ): W => {
+        switch (result.variant) {
+            case Variant.Ok:
+                return onOk(result.value);
+            case Variant.Err:
+                return onErr(result.error);
+        }
+    };
+
+    /**
+     * Maps an Ok value according to f, and does nothing to an Err
+     * @param f the mapping
      * @param result the result whose Ok value you want to map
+     * @see {@link eliminate}
      */
     export const map = <A, B, E>(
         f: (a: A) => B,
         result: Result<A, E>,
-    ): Result<B, E> => {
-        switch (result.variant) {
-            case Variant.Err:
-                return result;
+    ): Result<B, E> =>
+        eliminate((a): Result<B, E> => Result.Ok(f(a)), Result.Err, result);
 
-            case Variant.Ok:
-                return Result.Ok(f(result.value));
-        }
-    };
-
+    /**
+     * Maps an Err value according to f, and does nothing to an Ok
+     * @param f the mapping
+     * @param result the result whose Err value you want to map
+     * @see {@link eliminate}
+     */
     export const mapErr = <T, E, F>(
-        f: (a: E) => F,
+        f: (e: E) => F,
         result: Result<T, E>,
-    ): Result<T, F> => {
-        switch (result.variant) {
-            case Variant.Err:
-                return Result.Err(f(result.error));
+    ): Result<T, F> =>
+        eliminate(Result.Ok, (e): Result<T, F> => Result.Err(f(e)), result);
 
-            case Variant.Ok:
-                return result;
-        }
-    };
-
+    /**
+     * Maps an Ok value to another Result with the same Err type
+     * @param f the mapping to another Result type
+     * @param result the result whose Ok value you want to map
+     * @see {@link eliminate}
+     * @example
+     * ```ts
+     * bind(
+     *   mightFail(x, y),
+     *   (result) => bind(
+     *     alsoMightFail(result, z),
+     *     (finalResult) => finallyMightFail(finalResult, a, b, c),
+     *   ),
+     * );
+     * ```
+     */
     export const bind = <A, B, E>(
-        f: (a: A) => Result<B, E>,
         result: Result<A, E>,
-    ): Result<B, E> => {
-        switch (result.variant) {
-            case Variant.Err:
-                return result;
+        f: (a: A) => Result<B, E>,
+    ): Result<B, E> => eliminate((a): Result<B, E> => f(a), Result.Err, result);
 
-            case Variant.Ok:
-                return f(result.value);
-        }
-    };
-
+    /**
+     * Alias for {@link bind}
+     */
     export const flatMap = bind;
 
+    /**
+     * Alias for {@link bind}
+     */
     export const chain = bind;
 
+    /**
+     * Checks results sequentially and either succeeds with all values, or fails on the first Err
+     * @param results results to check
+     */
     export const all = <T, E>(results: Result<T, E>[]): Result<T[], E> => {
         const innerResults = new Array<T>(results.length);
         for (let i = 0; i < results.length; i++) {
@@ -111,9 +140,19 @@ export namespace Result {
         return Result.Ok(innerResults);
     };
 
+    /**
+     * Gets the value from a result, with a fallback if the result was an Err
+     * @param result
+     * @param fallback
+     */
     export const unwrapOr = <T, E>(result: Result<T, E>, fallback: T): T =>
         Result.isErr(result) ? fallback : result.value;
 
+    /**
+     * Gets the value from a result, with a computed fallback if the result was an Err
+     * @param result
+     * @param fallback
+     */
     export const unwrapOrElse = <T, E>(
         result: Result<T, E>,
         fallback: (e: E) => T,
