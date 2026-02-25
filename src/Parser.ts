@@ -75,7 +75,7 @@ export function ParseError(
  *
  * See the {@link Parser} namespace for available parser combinators
  *
- * @see ParseResult
+ * @see {@link ParseResult}
  */
 export type Parser<T> = {
     parse: (source: string, index?: number) => ParseResult<T>;
@@ -92,7 +92,7 @@ export namespace Parser {
      *
      * Accepts a function which takes a source string and index, and returns a {@link ParseResult}.
      *
-     * @see ParseResult
+     * @see {@link ParseResult}
      */
     export function Parser<T>(
         parse: (source: string, index?: number) => ParseResult<T>,
@@ -185,6 +185,14 @@ export namespace Parser {
 
     /**
      * A parser for reading zero or more whitespace characters.
+     * Passing `true` will require at least one whitespace character.
+     * @example
+     * ```ts
+     * const hello1 = sequence(exact("hello"), spaces(), exact("kitty"));
+     * hello1.parse("hellokitty"); // succeeds
+     * const hello2 = sequence(exact("hello"), spaces(true), exact("kitty"));
+     * hello2.parse("hellokitty"); // fails
+     * ```
      */
     export const spaces = (required = false): Parser<string> =>
         required
@@ -670,9 +678,7 @@ export namespace Parser {
         ...parsers: { [K in keyof T]: Parser<T[K]> }
     ): Parser<T> =>
         Parser((source: string, index: number = 0) => {
-            const values = new Array(parsers.length) as {
-                [K in keyof T]: T[K];
-            };
+            const values = new Array(parsers.length) as T;
             let result: ParseResult<T[number]>;
             for (let i = 0; i < parsers.length; i++) {
                 result = parsers[i].parse(source, index);
