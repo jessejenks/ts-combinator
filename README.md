@@ -222,6 +222,18 @@ the flexibility of writing functions which are not technically combinators.
 
 ## [Unreleased]
 
+
+## [3.3.0] : 2026-02-23
+### Added
+- Adds `validate`
+
+### Changed
+- Allows `spaces` to accept parameter to require whitespace characters
+
+## [3.2.0] : 2026-02-20
+### Added
+- Adds pratt parsing
+
 ## [3.1.1] : 2026-02-12
 ### Changed
 - Updated rollup config
