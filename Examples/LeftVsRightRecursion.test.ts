@@ -109,10 +109,11 @@ describe("Right Recursive Pratt", () => {
     );
 
     describe("compute results", () => {
-        const exprParser = pratt(left, {
+        const exprParser = pratt({
+            left: { parser: left },
             infix: {
                 op: infix,
-                acc: (symbol, left, right) =>
+                acc: (symbol, left, right): number =>
                     symbol === "-" ? left - right : left / right,
             },
         });
@@ -139,7 +140,8 @@ describe("Right Recursive Pratt", () => {
     });
 
     describe("as S Expressions", () => {
-        const exprParser = pratt<number, string>(left, {
+        const exprParser = pratt<number, string>({
+            left: { parser: left },
             infix: {
                 op: infix,
                 acc: (symbol, left, right) => `(${symbol} ${left} ${right})`,
@@ -176,7 +178,8 @@ describe("Left Recursive Pratt", () => {
     );
 
     describe("compute results", () => {
-        const exprParser = pratt(left, {
+        const exprParser = pratt({
+            left: { parser: left },
             infix: {
                 op: infix,
                 acc: (symbol, left, right) =>
@@ -206,10 +209,12 @@ describe("Left Recursive Pratt", () => {
     });
 
     describe("as S Expressions", () => {
-        const exprParser = pratt<number, string>(left, {
+        const exprParser = pratt({
+            left: { parser: left },
             infix: {
                 op: infix,
-                acc: (symbol, left, right) => `(${symbol} ${left} ${right})`,
+                acc: (symbol, left, right): string =>
+                    `(${symbol} ${left} ${right})`,
             },
         });
 

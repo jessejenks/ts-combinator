@@ -695,62 +695,38 @@ export namespace Parser {
             return ParseSuccess(values, index, source);
         });
 
-    export type UnaryOperator<T = string> = {
+    export type UnaryOperator<T> = {
         symbol: T;
         bindingPower: number;
     };
-    export const toUnaryOperator = <T = string>(
+    export function toUnaryOperator<T>(
         operatorSymbol: Parser<T>,
         bindingPower: number,
-    ): Parser<UnaryOperator<T>> =>
-        map(
-            ([, symbol]) => ({
+    ): Parser<UnaryOperator<T>> {
+        return map(
+            (symbol) => ({
                 symbol,
                 bindingPower,
             }),
-            sequence(spaces(), operatorSymbol, spaces()),
+            operatorSymbol,
         );
+    }
 
-    export type BinaryOperator<T = string> = {
+    export type BinaryOperator<T> = {
         symbol: T;
         bindingPower: [number, number];
     };
-    export const toBinaryOperator = <T = string>(
+    export const toBinaryOperator = <T, U>(
         operatorSymbol: Parser<T>,
         bindingPower: [number, number],
     ): Parser<BinaryOperator<T>> =>
         map(
-            ([, symbol]) => ({
+            (symbol) => ({
                 symbol,
                 bindingPower,
             }),
-            sequence(spaces(), operatorSymbol, spaces()),
+            operatorSymbol,
         );
-
-    export type OperatorOptions<
-        T,
-        Acc = T,
-        Infix = string,
-        Prefix = string,
-        Postfix = string,
-    > = {
-        infix?: {
-            op: Parser<BinaryOperator<Infix>>;
-            acc: (symbol: Infix, left: Acc | T, right: Acc | T) => Acc;
-        };
-        prefix?: {
-            op: Parser<UnaryOperator<Prefix>>;
-            acc: (symbol: Prefix, right: Acc | T) => Acc;
-        };
-        postfix?: {
-            op: Parser<UnaryOperator<Postfix>>;
-            acc: (symbol: Postfix, left: Acc | T) => Acc;
-        };
-        scope?: {
-            scopeBegin: Parser<string>;
-            scopeEnd: Parser<string>;
-        };
-    };
 
     /**
      * A Pratt parser is a parser based on the paper [top-down operator precedence](https://tdop.github.io/) by
@@ -758,22 +734,143 @@ export namespace Parser {
      * Many thanks to [this blog post](https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html) from
      * [Aleksey Kladov](https://matklad.github.io)
      */
-    export const pratt = <
+    export function pratt<
         T,
         Acc = T,
         Infix = string,
         Prefix = string,
         Postfix = string,
-    >(
-        left: Parser<T>,
-        {
-            infix,
-            prefix,
-            postfix,
-            scope,
-        }: OperatorOptions<T, Acc, Infix, Prefix, Postfix>,
-    ): Parser<Acc | T> =>
-        Parser<Acc | T>((source: string, index: number = 0) => {
+        Scope = string,
+        Trailing = string,
+    >(options: {
+        left: {
+            parser: Parser<T>;
+            acc: (parsed: T, trailing: Trailing) => Acc;
+        };
+        infix?: {
+            op: Parser<BinaryOperator<Infix>>;
+            acc: (
+                symbol: Infix,
+                left: Acc,
+                right: Acc,
+                trailing: Trailing,
+            ) => Acc;
+        };
+        prefix?: {
+            op: Parser<UnaryOperator<Prefix>>;
+            acc: (symbol: Prefix, right: Acc, trailing: Trailing) => Acc;
+        };
+        postfix?: {
+            op: Parser<UnaryOperator<Postfix>>;
+            acc: (symbol: Postfix, left: Acc, trailing: Trailing) => Acc;
+        };
+        scope?: {
+            scopeBegin: Parser<Scope>;
+            scopeEnd: Parser<Scope>;
+            acc?: (
+                begin: Scope,
+                inner: Acc,
+                end: Scope,
+                beginTrailing: Trailing,
+                endTrailing: Trailing,
+            ) => Acc;
+        };
+        trailing?: Parser<Trailing>;
+    }): Parser<Acc>;
+    export function pratt<
+        T,
+        Acc = T,
+        Infix = string,
+        Prefix = string,
+        Postfix = string,
+        Scope = string,
+        Trailing = string,
+    >(options: {
+        left: {
+            parser: Parser<T>;
+            acc?: (parsed: T, trailing: Trailing) => Acc | T;
+        };
+        infix?: {
+            op: Parser<BinaryOperator<Infix>>;
+            acc: (
+                symbol: Infix,
+                left: Acc | T,
+                right: Acc | T,
+                trailing: Trailing,
+            ) => Acc;
+        };
+        prefix?: {
+            op: Parser<UnaryOperator<Prefix>>;
+            acc: (symbol: Prefix, right: Acc | T, trailing: Trailing) => Acc;
+        };
+        postfix?: {
+            op: Parser<UnaryOperator<Postfix>>;
+            acc: (symbol: Postfix, left: Acc | T, trailing: Trailing) => Acc;
+        };
+        scope?: {
+            scopeBegin: Parser<Scope>;
+            scopeEnd: Parser<Scope>;
+            acc?: (
+                begin: Scope,
+                inner: Acc | T,
+                end: Scope,
+                beginTrailing: Trailing,
+                endTrailing: Trailing,
+            ) => Acc;
+        };
+        trailing?: Parser<Trailing>;
+    }): Parser<Acc | T>;
+    export function pratt<
+        T,
+        Acc = T,
+        Infix = string,
+        Prefix = string,
+        Postfix = string,
+        Scope = string,
+        Trailing = string,
+    >({
+        left,
+        infix,
+        prefix,
+        postfix,
+        scope,
+        trailing = spaces() as Parser<Trailing>,
+    }: {
+        left: {
+            parser: Parser<T>;
+            acc?: (parsed: T, trailing: Trailing) => Acc | T;
+        };
+        infix?: {
+            op: Parser<BinaryOperator<Infix>>;
+            acc: (
+                symbol: Infix,
+                left: Acc | T,
+                right: Acc | T,
+                trailing: Trailing,
+            ) => Acc;
+        };
+        prefix?: {
+            op: Parser<UnaryOperator<Prefix>>;
+            acc: (symbol: Prefix, right: Acc | T, trailing: Trailing) => Acc;
+        };
+        postfix?: {
+            op: Parser<UnaryOperator<Postfix>>;
+            acc: (symbol: Postfix, left: Acc | T, trailing: Trailing) => Acc;
+        };
+        scope?: {
+            scopeBegin: Parser<Scope>;
+            scopeEnd: Parser<Scope>;
+            acc?: (
+                begin: Scope,
+                inner: Acc | T,
+                end: Scope,
+                beginTrailing: Trailing,
+                endTrailing: Trailing,
+            ) => Acc;
+        };
+        trailing?: Parser<Trailing>;
+    }): Parser<Acc | T> {
+        return Parser<Acc | T>((source: string, index: number = 0) => {
             const isEof = () => index === source.length;
             function expr(minBindingPower: number = 0): ParseResult<Acc | T> {
                 let full: Acc | T;
@@ -789,6 +886,13 @@ export namespace Parser {
                     } = prefixResult.value;
                     index = newIndex;
 
+                    const trailingResult = trailing.parse(source, index);
+                    if (Result.isErr(trailingResult)) {
+                        return trailingResult;
+                    }
+                    const trailed = trailingResult.value.parsed;
+                    index = trailingResult.value.index;
+
                     const rhs = expr(rightBindingPower);
                     if (Result.isErr(rhs)) {
                         return rhs;
@@ -797,7 +901,7 @@ export namespace Parser {
                     full =
                         prefix === undefined
                             ? rhs.value.parsed
-                            : prefix.acc(symbol, rhs.value.parsed);
+                            : prefix.acc(symbol, rhs.value.parsed, trailed);
                 } else {
                     const scopeBeginResult =
                         scope === undefined
@@ -806,6 +910,17 @@ export namespace Parser {
 
                     if (Result.isOk(scopeBeginResult)) {
                         index = scopeBeginResult.value.index;
+
+                        const beginTrailingResult = trailing.parse(
+                            source,
+                            index,
+                        );
+                        if (Result.isErr(beginTrailingResult)) {
+                            return beginTrailingResult;
+                        }
+                        const beginTrailed = beginTrailingResult.value.parsed;
+                        index = beginTrailingResult.value.index;
+
                         const lhs = expr(0);
 
                         if (Result.isErr(lhs)) {
@@ -822,13 +937,41 @@ export namespace Parser {
                         }
                         index = scopeEndResult.value.index;
                         full = lhs.value.parsed;
+
+                        const endTrailingResult = trailing.parse(source, index);
+                        if (Result.isErr(endTrailingResult)) {
+                            return endTrailingResult;
+                        }
+                        const endTrailed = endTrailingResult.value.parsed;
+                        index = endTrailingResult.value.index;
+
+                        if (scope !== undefined && scope.acc !== undefined) {
+                            full = scope.acc(
+                                scopeBeginResult.value.parsed,
+                                full,
+                                scopeEndResult.value.parsed,
+                                beginTrailed,
+                                endTrailed,
+                            );
+                        }
                     } else {
-                        const lhs = left.parse(source, index);
+                        const lhs = left.parser.parse(source, index);
                         if (Result.isErr(lhs)) {
                             return lhs;
                         }
                         full = lhs.value.parsed;
                         index = lhs.value.index;
+
+                        const trailingResult = trailing.parse(source, index);
+                        if (Result.isErr(trailingResult)) {
+                            return trailingResult;
+                        }
+                        const trailed = trailingResult.value.parsed;
+                        index = trailingResult.value.index;
+
+                        if (left.acc !== undefined) {
+                            full = left.acc(full, trailed);
+                        }
                     }
                 }
 
@@ -852,10 +995,17 @@ export namespace Parser {
                         }
                         index = newIndex;
 
+                        const trailingResult = trailing.parse(source, index);
+                        if (Result.isErr(trailingResult)) {
+                            return trailingResult;
+                        }
+                        const trailed = trailingResult.value.parsed;
+                        index = trailingResult.value.index;
+
                         full =
                             postfix === undefined
                                 ? full
-                                : postfix.acc(symbol, full);
+                                : postfix.acc(symbol, full, trailed);
                         continue;
                     }
 
@@ -886,15 +1036,23 @@ export namespace Parser {
                     }
                     index = newIndex;
 
+                    const trailingResult = trailing.parse(source, index);
+                    if (Result.isErr(trailingResult)) {
+                        return trailingResult;
+                    }
+                    const trailed = trailingResult.value.parsed;
+                    index = trailingResult.value.index;
+
                     const rhs = expr(rightBindingPower);
                     if (Result.isErr(rhs)) {
                         return rhs;
                     }
-                    full = infix.acc(symbol, full, rhs.value.parsed);
+                    full = infix.acc(symbol, full, rhs.value.parsed, trailed);
                 }
                 return ParseSuccess(full, index, source);
             }
 
             return expr();
         });
+    }
 }
