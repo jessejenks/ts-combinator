@@ -1,3 +1,4 @@
+import { expectTypeOf } from "expect-type";
 import { Maybe } from "./Maybe";
 import { Result } from "./Result";
 import { Parser, ParseResult } from "./Parser";
@@ -1273,5 +1274,149 @@ describe("Individual Parser functions", () => {
                 }
             },
         );
+    });
+});
+
+describe("Parser inference testing", () => {
+    describe("exact", () => {
+        const { exact } = Parser;
+
+        test("exact inference", () => {
+            expectTypeOf(exact("foo")).toEqualTypeOf<Parser<"foo">>();
+            expectTypeOf(exact("foo")).toExtend<Parser<"foo" | "bar">>();
+            const s: string = "foo";
+            expectTypeOf(exact(s)).toEqualTypeOf<Parser<string>>();
+        });
+    });
+
+    describe("succeed", () => {
+        const { succeed } = Parser;
+
+        test("succeed inference", () => {
+            expectTypeOf(succeed("foo" as const)).toEqualTypeOf<
+                Parser<"foo">
+            >();
+            expectTypeOf(succeed("foo" as const)).toExtend<
+                Parser<"foo" | "bar">
+            >();
+            expectTypeOf(succeed("foo")).toEqualTypeOf<Parser<string>>();
+        });
+    });
+
+    describe("oneOf", () => {
+        const { oneOf } = Parser;
+
+        test("oneOf inference", () => {
+            expectTypeOf(
+                oneOf(Parser.exact("foo"), Parser.exact("bar")),
+            ).toEqualTypeOf<Parser<"foo" | "bar">>();
+            expectTypeOf(
+                oneOf(Parser.exact("foo"), Parser.int()),
+            ).toEqualTypeOf<Parser<"foo" | number>>();
+        });
+    });
+
+    describe("validate", () => {
+        const { validate } = Parser;
+
+        test("regular boolean check", () => {
+            expectTypeOf(validate((n) => n > 0, Parser.int())).toEqualTypeOf<
+                Parser<number>
+            >();
+        });
+
+        test("type narrowing validation", () => {
+            expectTypeOf(
+                validate(
+                    (t): t is "foo" => t === "foo",
+                    Parser.oneOf(Parser.exact("foo"), Parser.exact("bar")),
+                ),
+            ).toEqualTypeOf<Parser<"foo">>();
+        });
+    });
+
+    describe("sequence", () => {
+        const { sequence } = Parser;
+
+        test("sequence inference", () => {
+            expectTypeOf(
+                sequence(
+                    Parser.exact("foo"),
+                    Parser.spaces(),
+                    Parser.exact("bar"),
+                ),
+            ).toEqualTypeOf<Parser<["foo", string, "bar"]>>();
+        });
+    });
+
+    describe("conditional", () => {
+        const { conditional } = Parser;
+
+        test("conditional inference", () => {
+            expectTypeOf(
+                conditional(Parser.exact("foo"), Parser.exact("bar")),
+            ).toEqualTypeOf<Parser<["foo", "bar"]>>();
+
+            expectTypeOf(
+                Parser.oneOf(
+                    conditional(
+                        Parser.exact("foo"),
+                        Parser.sequence(
+                            Parser.exact("bar"),
+                            Parser.exact("baz"),
+                        ),
+                    ),
+                    Parser.sequence(Parser.exact("qux")),
+                ),
+            ).toEqualTypeOf<Parser<["foo", ["bar", "baz"]] | ["qux"]>>();
+        });
+    });
+
+    describe("map", () => {
+        const { map } = Parser;
+
+        test("map inference", () => {
+            expectTypeOf(map(() => "bar", Parser.exact("foo"))).toEqualTypeOf<
+                Parser<string>
+            >();
+
+            expectTypeOf(map((x) => x.length, Parser.alpha())).toEqualTypeOf<
+                Parser<number>
+            >();
+
+            expectTypeOf(
+                map(Number.parseInt, Parser.integerPart()),
+            ).toEqualTypeOf<Parser<number>>();
+        });
+    });
+
+    describe("optional", () => {
+        const { optional } = Parser;
+
+        test("optional inference", () => {
+            expectTypeOf(optional(Parser.exact("foo"), "bar")).toEqualTypeOf<
+                Parser<"foo" | "bar">
+            >();
+        });
+    });
+
+    describe("maybe", () => {
+        const { maybe } = Parser;
+
+        test("maybe inference", () => {
+            expectTypeOf(maybe(Parser.exact("foo"))).toEqualTypeOf<
+                Parser<Maybe<"foo">>
+            >();
+        });
+    });
+
+    describe("completely", () => {
+        const { completely } = Parser;
+
+        test("completely inference", () => {
+            expectTypeOf(completely(Parser.exact("foo"))).toEqualTypeOf<
+                Parser<"foo">
+            >();
+        });
     });
 });
