@@ -222,6 +222,9 @@ the flexibility of writing functions which are not technically combinators.
 
 ## [Unreleased]
 
+## [3.3.1] : 2026-08-05
+### Added
+- Adds type level tests with `expect-type`.
 
 ## [3.3.0] : 2026-02-23
 ### Added
@@ -295,7 +298,11 @@ the flexibility of writing functions which are not technically combinators.
 - Some atomic parsers
 - Basic Combinators to parse regular languages
 
-[Unreleased]: https://github.com/jessejenks/ts-combinator/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/jessejenks/ts-combinator/compare/v3.3.0...HEAD
+[3.3.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v3.3.0
+[3.2.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v3.2.0
+[3.1.1]: https://github.com/jessejenks/ts-combinator/releases/tag/v3.1.1
+[3.1.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v3.1.0
 [3.0.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v3.0.0
 [2.2.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v2.2.0
 [2.1.0]: https://github.com/jessejenks/ts-combinator/releases/tag/v2.1.0
