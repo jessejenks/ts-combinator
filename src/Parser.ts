@@ -111,10 +111,9 @@ export namespace Parser {
             }
             const [location, context] = getErrorMessageContext(source, index);
             return ParseError(
-                `${location}\nExpected "${toMatch}" but got "${source.slice(
-                    index,
-                    index + toMatch.length,
-                )}" instead\n\n${context}`,
+                `${location}\nExpected "${toMatch}" but got ${quoteOrEndOfInput(
+                    source.slice(index, index + toMatch.length),
+                )} instead\n\n${context}`,
             );
         });
 
@@ -378,15 +377,19 @@ export namespace Parser {
                     index,
                 );
                 return ParseError(
-                    `${location}\nExpected ${expected} but got "${source.charAt(
-                        index,
-                    )}" instead\n\n${context}`,
+                    `${location}\nExpected ${expected} but got ${quoteOrEndOfInput(
+                        source.charAt(index),
+                    )} instead\n\n${context}`,
                 );
             }
 
             const [matched] = match;
             return ParseSuccess(matched, index + matched.length, source);
         });
+
+    function quoteOrEndOfInput(s: string): string {
+        return s ? `"${s}"` : "end of input";
+    }
 
     function getErrorMessageContext(
         source: string,

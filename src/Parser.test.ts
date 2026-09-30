@@ -226,8 +226,8 @@ describe("Individual Parser functions", () => {
             const errCases: Array<[string, string, string]> = [
                 [
                     "",
-                    'Error at (line: 1, column: 1)\nExpected a digit but got "" instead\n\n\n^',
-                    'Error at (line: 1, column: 1)\nExpected digits but got "" instead\n\n\n^',
+                    "Error at (line: 1, column: 1)\nExpected a digit but got end of input instead\n\n\n^",
+                    "Error at (line: 1, column: 1)\nExpected digits but got end of input instead\n\n\n^",
                 ],
                 [
                     "abcde",
@@ -254,8 +254,8 @@ describe("Individual Parser functions", () => {
             const errCases: Array<[string, string, string]> = [
                 [
                     "",
-                    'Error at (line: 1, column: 1)\nExpected a character but got "" instead\n\n\n^',
-                    'Error at (line: 1, column: 1)\nExpected characters but got "" instead\n\n\n^',
+                    "Error at (line: 1, column: 1)\nExpected a character but got end of input instead\n\n\n^",
+                    "Error at (line: 1, column: 1)\nExpected characters but got end of input instead\n\n\n^",
                 ],
                 [
                     "12345",
@@ -282,8 +282,8 @@ describe("Individual Parser functions", () => {
             const errCases: Array<[string, string, string]> = [
                 [
                     "",
-                    'Error at (line: 1, column: 1)\nExpected an upper case character but got "" instead\n\n\n^',
-                    'Error at (line: 1, column: 1)\nExpected upper case characters but got "" instead\n\n\n^',
+                    "Error at (line: 1, column: 1)\nExpected an upper case character but got end of input instead\n\n\n^",
+                    "Error at (line: 1, column: 1)\nExpected upper case characters but got end of input instead\n\n\n^",
                 ],
                 [
                     "12345",
@@ -311,8 +311,8 @@ describe("Individual Parser functions", () => {
             const errCases: Array<[string, string, string]> = [
                 [
                     "",
-                    'Error at (line: 1, column: 1)\nExpected a lower case character but got "" instead\n\n\n^',
-                    'Error at (line: 1, column: 1)\nExpected lower case characters but got "" instead\n\n\n^',
+                    "Error at (line: 1, column: 1)\nExpected a lower case character but got end of input instead\n\n\n^",
+                    "Error at (line: 1, column: 1)\nExpected lower case characters but got end of input instead\n\n\n^",
                 ],
                 [
                     "12345",
@@ -341,8 +341,8 @@ describe("Individual Parser functions", () => {
             const errCases: Array<[string, string, string]> = [
                 [
                     "",
-                    'Error at (line: 1, column: 1)\nExpected an alpha numeric character but got "" instead\n\n\n^',
-                    'Error at (line: 1, column: 1)\nExpected alpha numeric characters but got "" instead\n\n\n^',
+                    "Error at (line: 1, column: 1)\nExpected an alpha numeric character but got end of input instead\n\n\n^",
+                    "Error at (line: 1, column: 1)\nExpected alpha numeric characters but got end of input instead\n\n\n^",
                 ],
                 [
                     "$100",
