@@ -36,7 +36,7 @@
         "typescript"
     ],
     "author": "Jesse Jenks",
-    "license": "MIT",
+    "license": "AGPL-3.0-only",
     "devDependencies": {
         "@babel/core": "7.29.7",
         "@babel/preset-env": "7.29.0",

@@ -1,5 +1,7 @@
 # TS Combinator
 
+![Tests](https://github.com/jessejenks/ts-combinator/actions/workflows/test.yml/badge.svg)
+
 Simple but Powerful Parser Combinator library in pure TypeScript
 
 1. [Getting Started](#getting-started)
